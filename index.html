@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Tukar Shift / OFF dan Melemburkan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Form Tukar Shift / OFF dan Melemburkan</h1>
+    <form id="shiftForm" class="form-card">
+      <h2>PIHAK 1</h2>
+      <label>NAMA</label>
+      <input type="text" name="nama1" required>
+      <label>JABATAN</label>
+      <input type="text" name="jabatan1" required>
+      <label>SHIFT DARI</label>
+      <input type="text" name="shift_dari1" required>
+      <label>SHIFT MENJADI</label>
+      <input type="text" name="shift_menjadi1" required>
+      <label>JADWAL OFF</label>
+      <input type="text" name="jadwal_off1">
+      <label>MELEMBURKAN</label>
+      <input type="text" name="melemburkan1">
+
+      <h2>PIHAK 2</h2>
+      <label>NAMA</label>
+      <input type="text" name="nama2" required>
+      <label>JABATAN</label>
+      <input type="text" name="jabatan2" required>
+      <label>SHIFT DARI</label>
+      <input type="text" name="shift_dari2" required>
+      <label>SHIFT MENJADI</label>
+      <input type="text" name="shift_menjadi2" required>
+      <label>JADWAL OFF</label>
+      <input type="text" name="jadwal_off2">
+      <label>MELEMBURKAN</label>
+      <input type="text" name="melemburkan2">
+
+      <h2>Detail Lain</h2>
+      <label>PERIOD CUT OFF MULAI</label>
+      <input type="date" name="cutoff_start" required>
+      <label>PERIOD CUT OFF SAMPAI</label>
+      <input type="date" name="cutoff_end" required>
+      <label>HARI</label>
+      <input type="text" name="hari" required>
+      <label>TANGGAL</label>
+      <input type="number" min="1" max="31" name="tanggal" required>
+      <label>BULAN</label>
+      <input type="number" min="1" max="12" name="bulan" required>
+      <label>TAHUN</label>
+      <input type="number" min="2000" max="2100" name="tahun" required>
+      <label>ALASAN</label>
+      <input type="text" name="alasan" required>
+      <label>LEADER</label>
+      <input type="text" name="leader" required>
+      <button type="submit">Simpan Data</button>
+    </form>
+    <div id="notif"></div>
+    <hr>
+    <a href="list-approve.html">Ke List Approve</a> |
+    <a href="list-data.html">Ke List Data</a> |
+    <a href="download.html">Ke Download Excel</a>
+  </div>
+  <script>
+    let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
+
+    document.getElementById('shiftForm').onsubmit = function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const obj = { approve: false };
+      [...form.elements].forEach(el => {
+        if (el.name) obj[el.name] = el.value;
+      });
+      dataArr.push(obj);
+      localStorage.setItem("shiftData", JSON.stringify(dataArr));
+      document.getElementById('notif').innerText = "Data berhasil disimpan!";
+      form.reset();
+    };
+  </script>
+</body>
+</html>

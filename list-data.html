@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>List Data Approve</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>List Data Approve</h1>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama 1</th>
+          <th>Nama 2</th>
+          <th>Leader</th>
+          <th>Melemburkan 1</th>
+          <th>Melemburkan 2</th>
+          <th>Period Mulai</th>
+          <th>Period Sampai</th>
+          <th>Status Approve</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <a href="index.html">Input Data</a> |
+    <a href="list-approve.html">List Approve</a> |
+    <a href="download.html">Download Excel</a>
+  </div>
+  <script>
+    let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
+
+    function renderTable() {
+      const tbody = document.querySelector('#dataTable tbody');
+      tbody.innerHTML = '';
+      dataArr.forEach((d, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${d.nama1}</td>
+          <td>${d.nama2}</td>
+          <td>${d.leader}</td>
+          <td>${d.melemburkan1 || ""}</td>
+          <td>${d.melemburkan2 || ""}</td>
+          <td>${d.cutoff_start}</td>
+          <td>${d.cutoff_end}</td>
+          <td>${d.approve ? "Approved" : "Pending"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>

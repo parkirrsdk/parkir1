@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Download Excel Approve</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Download Data Approved</h1>
+    <label>Tanggal Mulai:
+      <input type="date" id="filterStart">
+    </label>
+    <label>Tanggal Sampai:
+      <input type="date" id="filterEnd">
+    </label>
+    <button id="downloadExcel">Download Excel</button>
+    <a href="index.html">Input Data</a> |
+    <a href="list-approve.html">List Approve</a> |
+    <a href="list-data.html">List Data</a>
+  </div>
+  <script>
+    document.getElementById('downloadExcel').onclick = function() {
+      let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
+      const start = document.getElementById('filterStart').value;
+      const end = document.getElementById('filterEnd').value;
+      if (!start || !end) {
+        alert("Masukkan periode cut off mulai dan sampai.");
+        return;
+      }
+      // Filter data: only approved and within range
+      const filtered = dataArr.filter(d =>
+        d.approve &&
+        d.cutoff_start >= start && d.cutoff_end <= end
+      );
+      if (filtered.length === 0) {
+        alert("Tidak ada data pada periode tersebut.");
+        return;
+      }
+      // Format untuk Excel
+      const excelData = filtered.map(d => ({
+        'NAMA PIHAK 1': d.nama1,
+        'NAMA PIHAK 2': d.nama2,
+        'JABATAN PIHAK 1': d.jabatan1,
+        'JABATAN PIHAK 2': d.jabatan2,
+        'SHIFT DARI PIHAK 1': d.shift_dari1,
+        'SHIFT DARI PIHAK 2': d.shift_dari2,
+        'SHIFT MENJADI PIHAK 1': d.shift_menjadi1,
+        'SHIFT MENJADI PIHAK 2': d.shift_menjadi2,
+        'JADWAL OFF PIHAK 1': d.jadwal_off1,
+        'JADWAL OFF PIHAK 2': d.jadwal_off2,
+        'MELEMBURKAN PIHAK 1': d.melemburkan1,
+        'MELEMBURKAN PIHAK 2': d.melemburkan2,
+        'PERIODE CUT OFF MULAI': d.cutoff_start,
+        'PERIODE CUT OFF SAMPAI': d.cutoff_end,
+        'HARI': d.hari,
+        'TANGGAL': d.tanggal,
+        'BULAN': d.bulan,
+        'TAHUN': d.tahun,
+        'ALASAN': d.alasan,
+        'LEADER': d.leader,
+        'APPROVE': d.approve ? "APPROVED" : "PENDING"
+      }));
+
+      // SheetJS
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Report");
+
+      XLSX.writeFile(wb, `report_approved_${start}_to_${end}.xlsx`);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>List Approve Shift</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>List Approve Shift</h1>
+    <table id="approveTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama 1</th>
+          <th>Nama 2</th>
+          <th>Leader</th>
+          <th>Melemburkan 1</th>
+          <th>Melemburkan 2</th>
+          <th>Period Mulai</th>
+          <th>Period Sampai</th>
+          <th>Approve</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <a href="index.html">Input Data</a> |
+    <a href="list-data.html">List Data</a> |
+    <a href="download.html">Download Excel</a>
+  </div>
+  <script>
+    let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
+
+    function renderTable() {
+      const tbody = document.querySelector('#approveTable tbody');
+      tbody.innerHTML = '';
+      dataArr.forEach((d, i) => {
+        if(!d.approve){
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${d.nama1}</td>
+            <td>${d.nama2}</td>
+            <td>${d.leader}</td>
+            <td>${d.melemburkan1 || ""}</td>
+            <td>${d.melemburkan2 || ""}</td>
+            <td>${d.cutoff_start}</td>
+            <td>${d.cutoff_end}</td>
+            <td>${d.approve ? "Approved" : `<button onclick="approveData(${i})">Approve</button>`}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+    }
+
+    window.approveData = function(idx) {
+      dataArr[idx].approve = true;
+      localStorage.setItem("shiftData", JSON.stringify(dataArr));
+      renderTable();
+      alert("Data telah di-approve!");
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
