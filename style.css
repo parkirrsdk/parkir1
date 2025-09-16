@@ -4,12 +4,14 @@ body {
 }
 .container {
   background: white;
-  max-width: 500px;
+  max-width: 1000px; /* diperbesar agar tabel muat */
   margin: 30px auto;
   padding: 30px 25px;
   border-radius: 10px;
   box-shadow: 0 0 10px #bbb;
+  overflow-x: auto; /* agar jika tabel sangat lebar bisa scroll */
 }
+/* Form styling tetap */
 .form-card {
   display: flex;
   flex-direction: column;
@@ -68,4 +70,27 @@ a {
 }
 a:hover {
   text-decoration: underline;
+}
+
+/* Tambahan khusus untuk tabel agar border rapi dan text tidak keluar */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  table-layout: fixed; /* lebar kolom tetap */
+}
+
+th, td {
+  border: 1px solid #444;
+  padding: 8px 10px;
+  text-align: left;
+  word-break: break-word; /* potong kata jika kepanjangan */
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 140px; /* batas maksimal lebar cell */
+  box-sizing: border-box;
+}
+
+th {
+  background: #eee;
 }
