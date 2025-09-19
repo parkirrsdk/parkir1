@@ -17,35 +17,56 @@
           <th>Leader</th>
           <th>Melemburkan 1</th>
           <th>Melemburkan 2</th>
-          <th>Period Mulai</th>
-          <th>Period Sampai</th>
+          <th>Tanggal Tukar Shift</th>
           <th>Status Approve</th>
+          <th>Status Reject</th>
+          <th>Reason</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-    <a href="index.html">Input Data</a> |
+    <a href="form.html">Input Data</a> |
     <a href="list-approve.html">List Approve</a> |
     <a href="download.html">Download Excel</a>
   </div>
-  <script>
-    let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
 
-    function renderTable() {
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKZJW6_dH923FW63nF2VaWwwwf0bjpbxk",
+      authDomain: "shift-app-2e208.firebaseapp.com",
+      projectId: "shift-app-2e208",
+      storageBucket: "shift-app-2e208.firebasestorage.app",
+      messagingSenderId: "60569261229",
+      appId: "1:60569261229:web:ab719047a2abdad872e224"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function renderTable() {
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
-      dataArr.forEach((d, i) => {
+
+      const querySnapshot = await getDocs(collection(db, "shiftData"));
+      let i = 1;
+      querySnapshot.forEach(doc => {
+        const d = doc.data();
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${d.nama1}</td>
-          <td>${d.nama2}</td>
-          <td>${d.leader}</td>
+          <td>${i++}</td>
+          <td>${d.nama1 || ""}</td>
+          <td>${d.nama2 || ""}</td>
+          <td>${d.leader || ""}</td>
           <td>${d.melemburkan1 || ""}</td>
           <td>${d.melemburkan2 || ""}</td>
-          <td>${d.cutoff_start}</td>
-          <td>${d.cutoff_end}</td>
+          <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
           <td>${d.approve ? "Approved" : "Pending"}</td>
+          <td>${d.reject ? "Rejected" : "-"}</td>
+          <td>${d.reason || "-"}</td>
         `;
         tbody.appendChild(tr);
       });

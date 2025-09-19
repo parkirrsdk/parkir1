@@ -16,29 +16,48 @@
       <input type="date" id="filterEnd">
     </label>
     <button id="downloadExcel">Download Excel</button>
-    <a href="index.html">Input Data</a> |
+    <a href="form.html">Input Data</a> |
     <a href="list-approve.html">List Approve</a> |
     <a href="list-data.html">List Data</a>
   </div>
-  <script>
-    document.getElementById('downloadExcel').onclick = function() {
-      let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKZJW6_dH923FW63nF2VaWwwwf0bjpbxk",
+      authDomain: "shift-app-2e208.firebaseapp.com",
+      projectId: "shift-app-2e208",
+      storageBucket: "shift-app-2e208.firebasestorage.app",
+      messagingSenderId: "60569261229",
+      appId: "1:60569261229:web:ab719047a2abdad872e224"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById('downloadExcel').onclick = async function() {
       const start = document.getElementById('filterStart').value;
       const end = document.getElementById('filterEnd').value;
       if (!start || !end) {
-        alert("Masukkan periode cut off mulai dan sampai.");
+        alert("Masukkan tanggal mulai dan sampai.");
         return;
       }
-      // Filter data: only approved and within range
-      const filtered = dataArr.filter(d =>
-        d.approve &&
-        d.cutoff_start >= start && d.cutoff_end <= end
-      );
+
+      const snapshot = await getDocs(collection(db, "shiftData"));
+      const filtered = [];
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        if (d.approve && d.tanggal_shift && d.tanggal_shift >= start && d.tanggal_shift <= end) {
+          filtered.push(d);
+        }
+      });
+
       if (filtered.length === 0) {
         alert("Tidak ada data pada periode tersebut.");
         return;
       }
-      // Format untuk Excel
+
       const excelData = filtered.map(d => ({
         'NAMA PIHAK 1': d.nama1,
         'NAMA PIHAK 2': d.nama2,
@@ -52,18 +71,18 @@
         'JADWAL OFF PIHAK 2': d.jadwal_off2,
         'MELEMBURKAN PIHAK 1': d.melemburkan1,
         'MELEMBURKAN PIHAK 2': d.melemburkan2,
-        'PERIODE CUT OFF MULAI': d.cutoff_start,
-        'PERIODE CUT OFF SAMPAI': d.cutoff_end,
+        'TANGGAL TUKAR SHIFT': d.tanggal_shift,
         'HARI': d.hari,
         'TANGGAL': d.tanggal,
         'BULAN': d.bulan,
         'TAHUN': d.tahun,
         'ALASAN': d.alasan,
         'LEADER': d.leader,
-        'APPROVE': d.approve ? "APPROVED" : "PENDING"
+        'APPROVE': d.approve ? "APPROVED" : "PENDING",
+        'REJECT': d.reject ? "REJECTED" : "-",
+        'REASON': d.reason || "-"
       }));
 
-      // SheetJS
       const ws = XLSX.utils.json_to_sheet(excelData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Report");

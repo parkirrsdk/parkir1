@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Tukar Shift / OFF dan Melemburkan</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Form Tukar Shift / OFF dan Melemburkan</h1>
+    <button onclick="logout()">Logout</button>
+
+    <form id="shiftForm" class="form-card">
+      <h2>PIHAK 1</h2>
+      <label>NAMA</label>
+      <input type="text" name="nama1" required>
+      <label>JABATAN</label>
+      <input type="text" name="jabatan1" required>
+      <label>SHIFT DARI</label>
+      <input type="text" name="shift_dari1" required>
+      <label>SHIFT MENJADI</label>
+      <input type="text" name="shift_menjadi1" required>
+      <label>JADWAL OFF</label>
+      <input type="text" name="jadwal_off1">
+      <label>MELEMBURKAN</label>
+      <input type="text" name="melemburkan1">
+
+      <h2>PIHAK 2</h2>
+      <label>NAMA</label>
+      <input type="text" name="nama2" required>
+      <label>JABATAN</label>
+      <input type="text" name="jabatan2" required>
+      <label>SHIFT DARI</label>
+      <input type="text" name="shift_dari2" required>
+      <label>SHIFT MENJADI</label>
+      <input type="text" name="shift_menjadi2" required>
+      <label>JADWAL OFF</label>
+      <input type="text" name="jadwal_off2">
+      <label>MELEMBURKAN</label>
+      <input type="text" name="melemburkan2">
+
+      <h2>Detail Lain</h2>
+      <label>TANGGAL TUKAR SHIFT / OFF</label>
+      <input type="date" id="dateHelper" name="tanggal_shift" required>
+
+      <label>HARI</label>
+      <input type="text" id="hari" name="hari" required>
+      <label>TANGGAL</label>
+      <input type="number" min="1" max="31" id="tanggal" name="tanggal" required>
+      <label>BULAN</label>
+      <input type="number" min="1" max="12" id="bulan" name="bulan" required>
+      <label>TAHUN</label>
+      <input type="number" min="2000" max="2100" id="tahun" name="tahun" required>
+
+      <label>ALASAN</label>
+      <input type="text" name="alasan" required>
+      <label>LEADER</label>
+      <input type="text" name="leader" required>
+      <button type="submit">Simpan Data</button>
+    </form>
+
+    <div id="notif"></div>
+    <hr>
+    <a href="list-approve.html" id="approveLink">Ke List Approve</a> |
+    <a href="list-data.html" id="dataLink">Ke List Data</a> |
+    <a href="download.html" id="downloadLink">Ke Download Excel</a>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKZJW6_dH923FW63nF2VaWwwwf0bjpbxk",
+      authDomain: "shift-app-2e208.firebaseapp.com",
+      projectId: "shift-app-2e208",
+      storageBucket: "shift-app-2e208.firebasestorage.app",
+      messagingSenderId: "60569261229",
+      appId: "1:60569261229:web:ab719047a2abdad872e224"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    if (!currentUser) {
+      window.location.href = "index.html";
+    }
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
+    window.logout = logout;
+
+    const role = currentUser.role;
+    const approveLink = document.getElementById("approveLink");
+    const dataLink = document.getElementById("dataLink");
+    const downloadLink = document.getElementById("downloadLink");
+
+    if (role === "Admin") approveLink.style.display = "none";
+    if (role === "Leader") {
+      dataLink.style.display = "none";
+      downloadLink.style.display = "none";
+    }
+    if (role === "Attendance") {
+      approveLink.style.display = "none";
+      dataLink.style.display = "none";
+      downloadLink.style.display = "none";
+    }
+
+    const hariList = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+    document.getElementById("dateHelper").addEventListener("change", (e) => {
+      const dateVal = e.target.value;
+      if (!dateVal) return;
+      const d = new Date(dateVal);
+      document.getElementById("hari").value = hariList[d.getDay()];
+      document.getElementById("tanggal").value = d.getDate();
+      document.getElementById("bulan").value = d.getMonth() + 1;
+      document.getElementById("tahun").value = d.getFullYear();
+    });
+
+    document.getElementById('shiftForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const obj = { approve: false };
+      [...form.elements].forEach(el => {
+        if (el.name) obj[el.name] = el.value;
+      });
+      obj.createdBy = currentUser.username;
+      obj.createdAt = new Date();
+
+      try {
+        await addDoc(collection(db, "shiftData"), obj);
+        document.getElementById('notif').innerText = "✅ Data berhasil disimpan ke Firebase!";
+        form.reset();
+      } catch (err) {
+        console.error("Error:", err);
+        document.getElementById('notif').innerText = "❌ Gagal simpan data!";
+      }
+    };
+  </script>
+</body>
+</html>

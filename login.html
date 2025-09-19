@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Shift App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Login Shift App</h1>
+    <form id="loginForm" class="form-card">
+      <label>Username</label>
+      <input type="text" id="username" required>
+      <label>Password</label>
+      <input type="password" id="password" required>
+      <button type="submit">Login</button>
+    </form>
+    <div id="notif"></div>
+  </div>
+
+  <script>
+    const users = [
+      { username: "it", password: "1234", role: "IT" },
+      { username: "cpm", password: "1234", role: "CPM" },
+      { username: "superuser", password: "1234", role: "Superuser" },
+      { username: "admin", password: "1234", role: "Admin" },
+      { username: "maryono", password: "1234", role: "Leader" },
+      { username: "aris", password: "1234", role: "Leader" },
+      { username: "suyoto", password: "1234", role: "Leader" },
+      { username: "attd", password: "1234", role: "Attendance" }
+    ];
+
+    document.getElementById("loginForm").onsubmit = function(e) {
+      e.preventDefault();
+      const u = document.getElementById("username").value;
+      const p = document.getElementById("password").value;
+
+      const found = users.find(x => x.username === u && x.password === p);
+      if (found) {
+        localStorage.setItem("currentUser", JSON.stringify(found));
+        window.location.href = "index.html"; // masuk ke portal utama
+      } else {
+        document.getElementById("notif").innerText = "❌ Username atau password salah!";
+      }
+    };
+  </script>
+</body>
+</html>

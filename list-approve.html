@@ -17,48 +17,73 @@
           <th>Leader</th>
           <th>Melemburkan 1</th>
           <th>Melemburkan 2</th>
-          <th>Period Mulai</th>
-          <th>Period Sampai</th>
+          <th>Tanggal Tukar Shift</th>
           <th>Approve</th>
+          <th>Reject</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-    <a href="index.html">Input Data</a> |
+    <a href="form.html">Input Data</a> |
     <a href="list-data.html">List Data</a> |
     <a href="download.html">Download Excel</a>
   </div>
-  <script>
-    let dataArr = JSON.parse(localStorage.getItem("shiftData") || "[]");
 
-    function renderTable() {
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDKZJW6_dH923FW63nF2VaWwwwf0bjpbxk",
+      authDomain: "shift-app-2e208.firebaseapp.com",
+      projectId: "shift-app-2e208",
+      storageBucket: "shift-app-2e208.firebasestorage.app",
+      messagingSenderId: "60569261229",
+      appId: "1:60569261229:web:ab719047a2abdad872e224"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function renderTable() {
       const tbody = document.querySelector('#approveTable tbody');
       tbody.innerHTML = '';
-      dataArr.forEach((d, i) => {
-        if(!d.approve){
+
+      const snapshot = await getDocs(collection(db, "shiftData"));
+      let i = 1;
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        if (!d.approve && !d.reject) {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${i + 1}</td>
+            <td>${i++}</td>
             <td>${d.nama1}</td>
             <td>${d.nama2}</td>
             <td>${d.leader}</td>
             <td>${d.melemburkan1 || ""}</td>
             <td>${d.melemburkan2 || ""}</td>
-            <td>${d.cutoff_start}</td>
-            <td>${d.cutoff_end}</td>
-            <td>${d.approve ? "Approved" : `<button onclick="approveData(${i})">Approve</button>`}</td>
+            <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
+            <td><button onclick="approveData('${docSnap.id}')">Approve</button></td>
+            <td><button onclick="rejectData('${docSnap.id}')">Reject</button></td>
           `;
           tbody.appendChild(tr);
         }
       });
     }
 
-    window.approveData = function(idx) {
-      dataArr[idx].approve = true;
-      localStorage.setItem("shiftData", JSON.stringify(dataArr));
-      renderTable();
+    window.approveData = async function(id) {
+      await updateDoc(doc(db, "shiftData", id), { approve: true });
       alert("Data telah di-approve!");
-    }
+      renderTable();
+    };
+
+    window.rejectData = async function(id) {
+      const reason = prompt("Masukkan alasan reject:");
+      if (!reason) return;
+      await updateDoc(doc(db, "shiftData", id), { reject: true, reason });
+      alert("Data telah di-reject!");
+      renderTable();
+    };
 
     renderTable();
   </script>
