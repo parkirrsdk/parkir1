@@ -7,9 +7,9 @@ body {
 
 .container {
   background: white;
-  max-width: 1000px;
-  margin: 20px auto;
-  padding: 20px;
+  max-width: 15000px;
+  margin: 10px auto;
+  padding: 10px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   overflow-x: auto;
@@ -111,7 +111,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 10px;
-  min-width: 600px;
+  min-width: 500px;
 }
 
 th, td {
@@ -122,15 +122,15 @@ th, td {
 }
 
 th {
-  background: #f0f0f0;
-  font-weight: bold;
+  background: #800000;
+  font-weight: normal;
 }
 
 /* --- Tampilan tabel lebih enak dilihat --- */
 .styled-table {
   border-collapse: collapse;
-  margin: 15px 0;
-  font-size: 15px;
+  margin: 12px 0;
+  font-size: 12px;
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
@@ -146,7 +146,7 @@ th {
 .styled-table th, 
 .styled-table td {
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 12px;
   vertical-align: middle;
 }
 
@@ -163,7 +163,7 @@ button.delete,
 button.approve, 
 button.reject {
   padding: 4px 8px;
-  font-size: 13px;
+  font-size: 10px;
   border-radius: 4px;
 }
 
@@ -173,7 +173,7 @@ button.reject {
   padding: 4px 8px;
   border-radius: 12px;
   font-size: 12px;
-  font-weight: bold;
+  font-weight: normal;
   text-align: center;
 }
 

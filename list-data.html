@@ -8,12 +8,19 @@
 <body>
   <div class="container">
     <h1>List Data Approve</h1>
-    <table id="dataTable">
+    <div class="table-responsive">
+    <table id="dataTable" class="styled-table">
       <thead>
         <tr>
           <th>No</th>
           <th>Nama 1</th>
           <th>Nama 2</th>
+          <th>Shift Dari 1</th>
+          <th>Shift Menjadi 1</th>
+          <th>Tukar OFF 1</th>
+          <th>Shift Dari 2</th>
+          <th>Shift Menjadi 2</th>
+          <th>Tukar OFF 2</th>
           <th>Leader</th>
           <th>Melemburkan 1</th>
           <th>Melemburkan 2</th>
@@ -27,6 +34,7 @@
       </thead>
       <tbody></tbody>
     </table>
+  </div>
     <a href="form.html">Input Data</a> |
     <a href="list-approve.html">List Approve</a> |
     <a href="download.html">Download Excel</a>
@@ -74,15 +82,21 @@
           <td>${i++}</td>
           <td>${d.nama1 || ""}</td>
           <td>${d.nama2 || ""}</td>
+          <td>${d.shift_dari1 || ""}</td>
+          <td>${d.shift_menjadi1 || ""}</td>
+          <td>${d.jadwal_off1 || ""}</td>
+          <td>${d.shift_dari2 || ""}</td>
+          <td>${d.shift_menjadi2 || ""}</td>
+          <td>${d.jadwal_off2 || ""}</td>
           <td>${d.leader || ""}</td>
           <td>${d.melemburkan1 || ""}</td>
           <td>${d.melemburkan2 || ""}</td>
           <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
-          <td>${d.approve ? "Approved" : "Pending"}</td>
-          <td>${d.reject ? "Rejected" : "-"}</td>
+          <td><span class="badge ${d.approve ? 'approved' : 'pending'}">${d.approve ? "Approved" : "Pending"}</span></td>
+          <td><span class="badge ${d.reject ? 'rejected' : 'pending'}">${d.reject ? "Rejected" : "-"}</span></td>
           <td>${d.reason || "-"}</td>
           <td>${d.approvedBy || "-"}</td>
-          <td>${role === "Superuser" ? `<button onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
+          <td>${role === "Superuser" ? `<button class="delete" onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
         `;
         tbody.appendChild(tr);
       });
