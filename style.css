@@ -1,17 +1,20 @@
 body {
   background: #f8f8f8;
   font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
+
 .container {
   background: white;
-  max-width: 1000px; /* diperbesar agar tabel muat */
-  margin: 30px auto;
-  padding: 30px 25px;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 0 10px #bbb;
-  overflow-x: auto; /* agar jika tabel sangat lebar bisa scroll */
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  overflow-x: auto;
 }
-/* Form styling tetap */
+
 .form-card {
   display: flex;
   flex-direction: column;
@@ -21,17 +24,20 @@ body {
   border-radius: 8px;
   box-shadow: 0 0 5px #dde;
 }
+
 h1, h2 {
   color: #0099ff;
   margin-bottom: 10px;
 }
+
 label {
   margin-left: 2px;
   margin-bottom: 2px;
   font-weight: bold;
   color: #333;
 }
-input[type="text"], input[type="number"], input[type="date"] {
+
+input[type="text"], input[type="number"], input[type="date"], input[type="password"] {
   width: 100%;
   padding: 8px;
   border: 1px solid #bbb;
@@ -40,28 +46,52 @@ input[type="text"], input[type="number"], input[type="date"] {
   font-size: 15px;
   background: #fff;
 }
+
 button {
   background: #0099ff;
   color: white;
-  padding: 10px 0;
+  padding: 10px 15px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  margin-top: 12px;
+  font-size: 15px;
+  margin: 4px 2px;
 }
+
 button:hover {
   background: #007acc;
 }
+
+button.approve {
+  background: #28a745;
+}
+button.approve:hover {
+  background: #218838;
+}
+button.reject {
+  background: #dc3545;
+}
+button.reject:hover {
+  background: #c82333;
+}
+button.delete {
+  background: #6c757d;
+}
+button.delete:hover {
+  background: #5a6268;
+}
+
 #notif {
   color: green;
   font-weight: bold;
   margin-bottom: 8px;
   text-align: center;
 }
+
 hr {
   margin: 25px 0;
 }
+
 a {
   color: #0099ff;
   margin-right: 10px;
@@ -72,25 +102,54 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Tambahan khusus untuk tabel agar border rapi dan text tidak keluar */
+/* Tabel */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
 table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  table-layout: fixed; /* lebar kolom tetap */
+  min-width: 600px;
 }
 
 th, td {
-  border: 1px solid #444;
+  border: 1px solid #ddd;
   padding: 8px 10px;
   text-align: left;
-  word-break: break-word; /* potong kata jika kepanjangan */
-  overflow-wrap: break-word;
-  white-space: normal;
-  max-width: 140px; /* batas maksimal lebar cell */
-  box-sizing: border-box;
+  word-break: break-word;
 }
 
 th {
-  background: #eee;
+  background: #f0f0f0;
+  font-weight: bold;
+}
+
+/* Responsif untuk HP */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  .container {
+    padding: 15px;
+    margin: 10px;
+  }
+  table {
+    font-size: 13px;
+    min-width: 500px;
+  }
+  th, td {
+    padding: 6px;
+  }
+  h1, h2 {
+    font-size: 18px;
+  }
+  button {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+  a {
+    font-size: 13px;
+  }
 }

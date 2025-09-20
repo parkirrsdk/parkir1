@@ -21,6 +21,8 @@
           <th>Status Approve</th>
           <th>Status Reject</th>
           <th>Reason</th>
+          <th>User Approve</th>
+          <th>Delete</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -30,22 +32,23 @@
     <a href="download.html">Download Excel</a>
   </div>
 
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
-    authDomain: "shift-app-b73fd.firebaseapp.com",
-    projectId: "shift-app-b73fd",
-    storageBucket: "shift-app-b73fd.firebasestorage.app",
-    messagingSenderId: "408848137650",
-    appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
-  };
-
+    const firebaseConfig = {
+      apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+      authDomain: "shift-app-b73fd.firebaseapp.com",
+      projectId: "shift-app-b73fd",
+      storageBucket: "shift-app-b73fd.firebasestorage.app",
+      messagingSenderId: "408848137650",
+      appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    const role = currentUser ? currentUser.role : "";
 
     async function renderTable() {
       const tbody = document.querySelector('#dataTable tbody');
@@ -53,8 +56,19 @@
 
       const querySnapshot = await getDocs(collection(db, "shiftData"));
       let i = 1;
-      querySnapshot.forEach(doc => {
-        const d = doc.data();
+      const rows = [];
+      querySnapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        rows.push({ id: docSnap.id, ...d });
+      });
+
+      rows.sort((a, b) => {
+        if (!a.approve && !a.reject && (b.approve || b.reject)) return -1;
+        if (!b.approve && !b.reject && (a.approve || a.reject)) return 1;
+        return 0;
+      });
+
+      rows.forEach(d => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i++}</td>
@@ -67,10 +81,20 @@
           <td>${d.approve ? "Approved" : "Pending"}</td>
           <td>${d.reject ? "Rejected" : "-"}</td>
           <td>${d.reason || "-"}</td>
+          <td>${d.approvedBy || "-"}</td>
+          <td>${role === "Superuser" ? `<button onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
         `;
         tbody.appendChild(tr);
       });
     }
+
+    window.deleteData = async function(id) {
+      if (confirm("Yakin ingin menghapus data ini?")) {
+        await deleteDoc(doc(db, "shiftData", id));
+        alert("Data telah dihapus!");
+        renderTable();
+      }
+    };
 
     renderTable();
   </script>

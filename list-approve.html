@@ -20,6 +20,7 @@
           <th>Tanggal Tukar Shift</th>
           <th>Approve</th>
           <th>Reject</th>
+          <th>Delete</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -29,21 +30,23 @@
     <a href="download.html">Download Excel</a>
   </div>
 
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
-    authDomain: "shift-app-b73fd.firebaseapp.com",
-    projectId: "shift-app-b73fd",
-    storageBucket: "shift-app-b73fd.firebasestorage.app",
-    messagingSenderId: "408848137650",
-    appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+      authDomain: "shift-app-b73fd.firebaseapp.com",
+      projectId: "shift-app-b73fd",
+      storageBucket: "shift-app-b73fd.firebasestorage.app",
+      messagingSenderId: "408848137650",
+      appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    const role = currentUser ? currentUser.role : "";
 
     async function renderTable() {
       const tbody = document.querySelector('#approveTable tbody');
@@ -65,6 +68,7 @@
             <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
             <td><button onclick="approveData('${docSnap.id}')">Approve</button></td>
             <td><button onclick="rejectData('${docSnap.id}')">Reject</button></td>
+            <td>${role === "Superuser" ? `<button onclick="deleteData('${docSnap.id}')">Delete</button>` : ""}</td>
           `;
           tbody.appendChild(tr);
         }
@@ -72,7 +76,7 @@
     }
 
     window.approveData = async function(id) {
-      await updateDoc(doc(db, "shiftData", id), { approve: true });
+      await updateDoc(doc(db, "shiftData", id), { approve: true, approvedBy: currentUser.username });
       alert("Data telah di-approve!");
       renderTable();
     };
@@ -83,6 +87,14 @@
       await updateDoc(doc(db, "shiftData", id), { reject: true, reason });
       alert("Data telah di-reject!");
       renderTable();
+    };
+
+    window.deleteData = async function(id) {
+      if (confirm("Yakin ingin menghapus data ini?")) {
+        await deleteDoc(doc(db, "shiftData", id));
+        alert("Data telah dihapus!");
+        renderTable();
+      }
     };
 
     renderTable();
