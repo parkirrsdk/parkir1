@@ -110,7 +110,7 @@ a:hover {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   min-width: 600px;
 }
 
@@ -124,6 +124,91 @@ th, td {
 th {
   background: #f0f0f0;
   font-weight: bold;
+}
+
+/* --- Tampilan tabel lebih enak dilihat --- */
+.styled-table {
+  border-collapse: collapse;
+  margin: 15px 0;
+  font-size: 15px;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.styled-table thead tr {
+  background-color: #0099ff;
+  color: #ffffff;
+  text-align: center;
+}
+
+.styled-table th, 
+.styled-table td {
+  padding: 10px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.styled-table tbody tr:nth-child(even) {
+  background-color: #fdfdfd;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f1f8ff;
+}
+
+/* Tombol kecil di tabel */
+button.delete, 
+button.approve, 
+button.reject {
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+/* Badge status */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.badge.approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+.badge.pending {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+.badge.rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* --- Navigasi link di bawah tabel --- */
+.nav-links {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-links a {
+  background: #f5faff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.05);
+  transition: background 0.2s;
+}
+
+.nav-links a:hover {
+  background: #e1f0ff;
+  text-decoration: none;
 }
 
 /* Responsif untuk HP */

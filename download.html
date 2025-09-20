@@ -25,14 +25,14 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
-    authDomain: "shift-app-b73fd.firebaseapp.com",
-    projectId: "shift-app-b73fd",
-    storageBucket: "shift-app-b73fd.firebasestorage.app",
-    messagingSenderId: "408848137650",
-    appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+      authDomain: "shift-app-b73fd.firebaseapp.com",
+      projectId: "shift-app-b73fd",
+      storageBucket: "shift-app-b73fd.firebasestorage.app",
+      messagingSenderId: "408848137650",
+      appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+    };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -80,7 +80,8 @@
         'LEADER': d.leader,
         'APPROVE': d.approve ? "APPROVED" : "PENDING",
         'REJECT': d.reject ? "REJECTED" : "-",
-        'REASON': d.reason || "-"
+        'REASON': d.reason || "-",
+        'USER APPROVE': d.approvedBy || "-"
       }));
 
       const ws = XLSX.utils.json_to_sheet(excelData);
