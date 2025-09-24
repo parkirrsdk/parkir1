@@ -16,12 +16,13 @@
       <input type="date" id="filterEnd">
     </label>
     <button id="downloadExcel">Download Excel</button>
+    <br><br>
     <a href="form.html">Input Data</a> |
     <a href="list-approve.html">List Approve</a> |
     <a href="list-data.html">List Data</a>
   </div>
 
-  <script type="module">
+  <script type="module">">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -36,60 +37,101 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    document.getElementById('downloadExcel').onclick = async function() {
-      const start = document.getElementById('filterStart').value;
-      const end = document.getElementById('filterEnd').value;
-      if (!start || !end) {
-        alert("Masukkan tanggal mulai dan sampai.");
-        return;
-      }
+    async function downloadExcel() {
+      const workbook = new ExcelJS.Workbook();
 
-      const snapshot = await getDocs(collection(db, "shiftData"));
-      const filtered = [];
-      snapshot.forEach(docSnap => {
-        const d = docSnap.data();
-        if (d.approve && d.tanggal_shift && d.tanggal_shift >= start && d.tanggal_shift <= end) {
-          filtered.push(d);
-        }
+      // ------------------- SHEET SHIFT/OFF -------------------
+      const sheetShift = workbook.addWorksheet("Tukar Shift/Off");
+      sheetShift.addRow([
+        "No", "Nama", "Jabatan", "Shift Dari", "Shift Menjadi", "Tukar Off",
+        "Tanggal", "Status Approve", "Status Reject", "Reason",
+        "User Approve", "Tanggal Approve"
+      ]);
+
+      const shiftSnap = await getDocs(collection(db, "shiftData"));
+      let i = 1;
+      shiftSnap.forEach(doc => {
+        const d = doc.data();
+        sheetShift.addRow([
+          i++,
+          d.nama,
+          d.jabatan,
+          d.shift_dari || "-",
+          d.shift_menjadi || "-",
+          d.tukar_off || "-",
+          `${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}`,
+          d.approve ? "Approved" : "Pending",
+          d.reject ? "Rejected" : "-",
+          d.reason || "-",
+          d.approvedBy || "-",
+          d.approveDate || "-"
+        ]);
       });
 
-      if (filtered.length === 0) {
-        alert("Tidak ada data pada periode tersebut.");
-        return;
-      }
+      // ------------------- SHEET GANTI HARI -------------------
+      const sheetGantiHari = workbook.addWorksheet("Ganti Hari");
+      sheetGantiHari.addRow([
+        "No", "Nama", "Jabatan", "Alasan", "Tanggal", "Tanggal Pengganti Hari",
+        "Status Approve", "Status Reject", "Reason",
+        "User Approve", "Tanggal Approve Leader", "Tanggal Approve Admin"
+      ]);
 
-      const excelData = filtered.map(d => ({
-        'NAMA PIHAK 1': d.nama1,
-        'NAMA PIHAK 2': d.nama2,
-        'JABATAN PIHAK 1': d.jabatan1,
-        'JABATAN PIHAK 2': d.jabatan2,
-        'SHIFT DARI PIHAK 1': d.shift_dari1,
-        'SHIFT DARI PIHAK 2': d.shift_dari2,
-        'SHIFT MENJADI PIHAK 1': d.shift_menjadi1,
-        'SHIFT MENJADI PIHAK 2': d.shift_menjadi2,
-        'JADWAL OFF PIHAK 1': d.jadwal_off1,
-        'JADWAL OFF PIHAK 2': d.jadwal_off2,
-        'MELEMBURKAN PIHAK 1': d.melemburkan1,
-        'MELEMBURKAN PIHAK 2': d.melemburkan2,
-        'TANGGAL TUKAR SHIFT': d.tanggal_shift,
-        'HARI': d.hari,
-        'TANGGAL': d.tanggal,
-        'BULAN': d.bulan,
-        'TAHUN': d.tahun,
-        'ALASAN': d.alasan,
-        'LEADER': d.leader,
-        'APPROVE': d.approve ? "APPROVED" : "PENDING",
-        'REJECT': d.reject ? "REJECTED" : "-",
-        'REASON': d.reason || "-",
-        'USER APPROVE': d.approvedBy || "-"
-      }));
+      const gantiHariSnap = await getDocs(collection(db, "gantiHariData"));
+      let j = 1;
+      gantiHariSnap.forEach(doc => {
+        const d = doc.data();
+        let approvers = [];
+        if (d.leaderApprove && d.leaderBy) approvers.push(d.leaderBy);
+        if (d.adminApprove && d.adminBy) approvers.push(d.adminBy);
+        const approvedUsers = approvers.length > 0 ? approvers.join(", ") : "-";
 
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Report");
+        sheetGantiHari.addRow([
+          j++,
+          d.nama,
+          d.jabatan,
+          d.dikarenakan,
+          `${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}`,
+          `${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}`,
+          d.approve ? "Approved" : "Pending",
+          d.reject ? "Rejected" : "-",
+          d.reason || "-",
+          approvedUsers,
+          d.leaderApproveDate || "-",
+          d.adminApproveDate || "-"
+        ]);
+      });
 
-      XLSX.writeFile(wb, `report_approved_${start}_to_${end}.xlsx`);
-    };
+      // ------------------- SHEET LEMBUR -------------------
+      const sheetLembur = workbook.addWorksheet("Lembur");
+      sheetLembur.addRow([
+        "No", "Nama", "Jabatan", "Shift", "Dilemburkan Oleh", "Tanggal Melemburkan",
+        "Status Approve", "Status Reject", "Reason",
+        "User Approve", "Tanggal Approve"
+      ]);
+
+      const lemburSnap = await getDocs(collection(db, "lemburData"));
+      let k = 1;
+      lemburSnap.forEach(doc => {
+        const d = doc.data();
+        sheetLembur.addRow([
+          k++,
+          d.nama,
+          d.jabatan,
+          d.shift || "-",
+          d.dilemburkan_oleh,
+          `${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}`,
+          d.approve ? "Approved" : "Pending",
+          d.reject ? "Rejected" : "-",
+          d.reason || "-",
+          d.approvedBy || "-",
+          d.approveDate || "-"
+        ]);
+      });
+
+      // ------------------- EXPORT FILE -------------------
+      const buffer = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), "Data_Shift.xlsx");
+    }
   </script>
 </body>
 </html>

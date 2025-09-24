@@ -2,12 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>List Data Tukar Shift/Off</title>
+  <title>List Data Ganti Hari</title>
   <link rel="stylesheet" href="style-listData.css">
 </head>
 <body>
   <div class="container">
-    <h1>List Data Tukar Shift/Off</h1>
+    <h1>List Data Ganti Hari</h1>
     <div class="table-responsive">
       <table id="dataTable" class="styled-table">
         <thead>
@@ -15,10 +15,9 @@
             <th>No</th>
             <th>Nama</th>
             <th>Jabatan</th>
-            <th>Shift Dari</th>
-            <th>Shift Menjadi</th>
-            <th>Tukar Off</th>
+            <th>Alasan</th>
             <th>Tanggal</th>
+            <th>Tanggal Penganti Hari</th>
             <th>Status Approve</th>
             <th>Status Reject</th>
             <th>Reason</th>
@@ -34,7 +33,7 @@
     <!-- Navigasi link -->
     <div class="nav-links">
       <a href="form.html">Input Data</a>
-      <a href="list-approve.html">List Approve</a>
+      <a href="list-approve-ganti-hari.html">List Approve</a>
       <a href="download.html">Download Excel</a>
     </div>
   </div>
@@ -61,7 +60,7 @@
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
 
-      const querySnapshot = await getDocs(collection(db, "shiftData"));
+      const querySnapshot = await getDocs(collection(db, "gantiHariData"));
       let i = 1;
       const rows = [];
       querySnapshot.forEach(docSnap => {
@@ -77,20 +76,31 @@
       });
 
       rows.forEach(d => {
+        // Gabungkan siapa saja yang sudah approve
+        let approvers = [];
+        if (d.leaderApprove && d.leaderBy) approvers.push(d.leaderBy);
+        if (d.adminApprove && d.adminBy) approvers.push(d.adminBy);
+        const approvedUsers = approvers.length > 0 ? approvers.join(", ") : "-";
+
+        // Gabungkan tanggal approve
+        let approveDates = [];
+        if (d.leaderApproveDate) approveDates.push(`Leader: ${d.leaderApproveDate}`);
+        if (d.adminApproveDate) approveDates.push(`Admin: ${d.adminApproveDate}`);
+        const approveDateText = approveDates.length > 0 ? approveDates.join("<br>") : "-";
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i++}</td>
           <td>${d.nama}</td>
           <td>${d.jabatan}</td>
-          <td>${d.shift_dari || "-"}</td>
-          <td>${d.shift_menjadi || "-"}</td>
-          <td>${d.tukar_off || "-"}</td>
-          <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
+          <td>${d.dikarenakan}</td>
+          <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
+          <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
           <td><span class="badge ${d.approve ? 'approved' : 'pending'}">${d.approve ? "Approved" : "Pending"}</span></td>
           <td><span class="badge ${d.reject ? 'rejected' : 'pending'}">${d.reject ? "Rejected" : "-"}</span></td>
           <td>${d.reason || "-"}</td>
-          <td>${d.approvedBy || "-"}</td>
-          <td>${d.approveDate || "-"}</td>
+          <td>${approvedUsers}</td>
+          <td>${approveDateText}</td>
           <td>${role === "Superuser" ? `<button class="delete" onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
         `;
         tbody.appendChild(tr);
@@ -99,7 +109,7 @@
 
     window.deleteData = async function(id) {
       if (confirm("Yakin ingin menghapus data ini?")) {
-        await deleteDoc(doc(db, "shiftData", id));
+        await deleteDoc(doc(db, "gantiHariData", id));
         alert("Data telah dihapus!");
         renderTable();
       }

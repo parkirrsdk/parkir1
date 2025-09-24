@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Penggantian Hari</title>
+  <link rel="stylesheet" href="style-form.css">
+</head>
+<body>
+  <div class="form-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="Sidebar navigasi">
+      <div class="sidebar-top">
+        <div class="brand">
+          <div class="logo">📅</div>
+          <div class="brand-text">
+            <div class="brand-title">Shift App</div>
+            <div class="brand-sub">Panel Input</div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="form.html" id="tukarshiftLink" class="sidebar-link">Form Tukar Shift/Off</a>
+          <a href="form-lembur.html" id="melemburkanLink" class="sidebar-link">Form Melemburkan</a>
+          <a href="form-ganti-hari.html" id="gantihariLink" class="sidebar-link">Form Pengantian Hari</a>
+          <a href="list-data.html" id="dataLink" class="sidebar-link">List Data Tukar Shift/Off</a>
+		  <a href="list-data-lembur.html" id="datalemburLink" class="sidebar-link">List Data Melemburkan</a>
+		  <a href="list-data-ganti-hari.html" id="datagantihariLink" class="sidebar-link">List Data Ganti Hari</a>
+          <a href="download.html" id="downloadLink" class="sidebar-link">Download Excel</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content" role="main">
+      <header class="content-header">
+        <h1>Form Penggantian Hari</h1>
+        <p id="notif" class="notif-area" aria-live="polite"></p>
+      </header>
+
+      <section class="form-wrap">
+        <form id="gantiHariForm" class="form-card">
+          <label>NAMA</label>
+          <input type="text" name="nama" required>
+
+          <label>JABATAN</label>
+          <input type="text" name="jabatan" required>
+
+          <!-- Bagian tanggal awal -->
+          <label>HARI & TANGGAL</label>
+          <input type="date" id="dateAwal" name="tanggal_awal" required>
+
+          <div class="grid-4">
+            <div>
+              <label>HARI</label>
+              <input type="text" id="hariAwal" name="hari_awal" required>
+            </div>
+            <div>
+              <label>TANGGAL</label>
+              <input type="number" min="1" max="31" id="tanggalAwal" name="tanggal_awal" required>
+            </div>
+            <div>
+              <label>BULAN</label>
+              <input type="number" min="1" max="12" id="bulanAwal" name="bulan_awal" required>
+            </div>
+            <div>
+              <label>TAHUN</label>
+              <input type="number" min="2000" max="2100" id="tahunAwal" name="tahun_awal" required>
+            </div>
+          </div>
+
+          <label>Alasan</label>
+          <input type="text" name="dikarenakan" required>
+
+          <!-- Bagian tanggal pengganti -->
+          <label>UNTUK MENGGANTIKAN HARI & TANGGAL</label>
+          <input type="date" id="dateGanti" name="tanggal_ganti" required>
+
+          <div class="grid-4">
+            <div>
+              <label>HARI</label>
+              <input type="text" id="hariGanti" name="hari_ganti" required>
+            </div>
+            <div>
+              <label>TANGGAL</label>
+              <input type="number" min="1" max="31" id="tanggalGanti" name="tanggal_ganti" required>
+            </div>
+            <div>
+              <label>BULAN</label>
+              <input type="number" min="1" max="12" id="bulanGanti" name="bulan_ganti" required>
+            </div>
+            <div>
+              <label>TAHUN</label>
+              <input type="number" min="2000" max="2100" id="tahunGanti" name="tahun_ganti" required>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-save">Simpan Data</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase + app script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+      authDomain: "shift-app-b73fd.firebaseapp.com",
+      projectId: "shift-app-b73fd",
+      storageBucket: "shift-app-b73fd.firebasestorage.app",
+      messagingSenderId: "408848137650",
+      appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    if (!currentUser) window.location.href = "index.html";
+
+    function logout() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "index.html";
+    }
+    window.logout = logout;
+
+ 
+ // role access
+    const role = currentUser.role;
+    if (role === "Admin") document.getElementById("approveLink").style.display = "none";
+    if (role === "Leader") {
+      document.getElementById("dataLink").style.display = "none";
+      document.getElementById("downloadLink").style.display = "none";
+    }
+    if (role === "Attendance") {
+      document.getElementById("approveLink").style.display = "none";
+      document.getElementById("dataLink").style.display = "none";
+      document.getElementById("downloadLink").style.display = "none";
+    }
+
+    // submit -> Firebase gantiHariData
+    document.getElementById("gantiHariForm").onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const obj = { approve: false };
+      [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
+      obj.createdBy = currentUser.username;
+      obj.createdAt = new Date();
+      try {
+        await addDoc(collection(db, "gantiHariData"), obj);
+        document.getElementById("notif").innerText = "✅ Data penggantian hari berhasil disimpan!";
+        document.getElementById("notif").className = "notif-area success";
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("notif").innerText = "❌ Gagal simpan data penggantian hari!";
+        document.getElementById("notif").className = "notif-area error";
+      }
+    };
+  </script>
+
+  <!-- Auto isi tanggal -->
+  <script>
+    function isiTanggalOtomatis(dateInputId, hariId, tanggalId, bulanId, tahunId) {
+      const dateInput = document.getElementById(dateInputId);
+      dateInput.addEventListener("change", function () {
+        if (!this.value) return;
+        const d = new Date(this.value);
+        const namaHari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+        document.getElementById(hariId).value = namaHari[d.getDay()];
+        document.getElementById(tanggalId).value = d.getDate();
+        document.getElementById(bulanId).value = d.getMonth() + 1;
+        document.getElementById(tahunId).value = d.getFullYear();
+      });
+    }
+    isiTanggalOtomatis("dateAwal","hariAwal","tanggalAwal","bulanAwal","tahunAwal");
+    isiTanggalOtomatis("dateGanti","hariGanti","tanggalGanti","bulanGanti","tahunGanti");
+  </script>
+</body>
+</html>

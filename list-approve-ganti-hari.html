@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>List Approve Ganti Hari</title>
+  <link rel="stylesheet" href="style-listApprove.css">
+  <style>
+    .btn-approve-leader {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-approve-admin {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-reject {
+      background-color: #f44336;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn-delete {
+      background-color: #9c27b0;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>List Approve Ganti Hari</h1>
+    <div class="table-responsive">
+      <table id="approveTable" class="styled-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Jabatan</th>
+            <th>Alasan</th>
+            <th>Tanggal</th>
+            <th>Tanggal Pengganti Hari</th>
+            <th>Leader Approve</th>
+            <th>Tanggal Approve Leader</th>
+            <th>Admin Approve</th>
+            <th>Tanggal Approve Admin</th>
+            <th>Approve</th>
+            <th>Reject</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="nav-links">
+      <a href="form.html">Input Data</a>
+      <a href="list-data.html">List Data</a>
+      <a href="download.html">Download Excel</a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+      authDomain: "shift-app-b73fd.firebaseapp.com",
+      projectId: "shift-app-b73fd",
+      storageBucket: "shift-app-b73fd.firebasestorage.app",
+      messagingSenderId: "408848137650",
+      appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    const role = currentUser ? currentUser.role : "";
+
+    async function renderTable() {
+      const tbody = document.querySelector('#approveTable tbody');
+      tbody.innerHTML = '';
+
+      const snapshot = await getDocs(collection(db, "gantiHariData"));
+      let i = 1;
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+
+        if (!d.reject) {
+          let approveBtn = "";
+          if (role === "Leader" && !d.leaderApprove) {
+            approveBtn = `<button class="btn-approve-leader" onclick="approveData('${docSnap.id}')">Approve Leader</button>`;
+          } else if (role === "Admin" && !d.adminApprove) {
+            approveBtn = `<button class="btn-approve-admin" onclick="approveData('${docSnap.id}')">Approve Admin</button>`;
+          }
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i++}</td>
+            <td>${d.nama}</td>
+            <td>${d.jabatan}</td>
+            <td>${d.dikarenakan}</td>
+            <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
+            <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
+            <td>${d.leaderApprove ? "✅ " + (d.leaderBy || "") : "❌ Belum"}</td>
+            <td>${d.leaderApproveDate || "-"}</td>
+            <td>${d.adminApprove ? "✅ " + (d.adminBy || "") : "❌ Belum"}</td>
+            <td>${d.adminApproveDate || "-"}</td>
+            <td>${approveBtn}</td>
+            <td><button class="btn-reject" onclick="rejectData('${docSnap.id}')">Reject</button></td>
+            <td>${role === "Superuser" ? `<button class="btn-delete" onclick="deleteData('${docSnap.id}')">Delete</button>` : ""}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+    }
+
+    window.approveData = async function(id) {
+      const ref = doc(db, "gantiHariData", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+
+      if (!data) return;
+
+      if (role === "Leader") {
+        await updateDoc(ref, { 
+          leaderApprove: true, 
+          leaderBy: currentUser.username,
+          leaderApproveDate: new Date().toLocaleString("id-ID")
+        });
+        alert("Leader sudah approve!");
+      } 
+      else if (role === "Admin") {
+        if (!data.leaderApprove) {
+          alert("Leader belum approve, Admin tidak bisa approve.");
+          return;
+        }
+        await updateDoc(ref, { 
+          adminApprove: true, 
+          adminBy: currentUser.username,
+          adminApproveDate: new Date().toLocaleString("id-ID"),
+          approve: true,
+          approvedBy: `${data.leaderBy || ""}, ${currentUser.username}`
+        });
+        alert("Admin sudah approve!");
+      }
+      renderTable();
+    };
+
+    window.rejectData = async function(id) {
+      const reason = prompt("Masukkan alasan reject:");
+      if (!reason) return;
+      await updateDoc(doc(db, "gantiHariData", id), { reject: true, reason });
+      alert("Data telah di-reject!");
+      renderTable();
+    };
+
+    window.deleteData = async function(id) {
+      if (confirm("Yakin ingin menghapus data ini?")) {
+        await deleteDoc(doc(db, "gantiHariData", id));
+        alert("Data telah dihapus!");
+        renderTable();
+      }
+    };
+
+    renderTable();
+  </script>
+</body>
+</html>

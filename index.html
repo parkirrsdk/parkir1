@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard Shift App</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-index.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Dashboard Shift App</h1>
-    <p id="welcome"></p>
-    <button onclick="logout()">Logout</button>
+  <div class="dashboard-container">
+    <h1 class="fade-in">Dashboard Shift App</h1>
+    <p id="welcome" class="slide-down"></p>
+    <button onclick="logout()" class="btn-logout">Logout</button>
     <hr>
-    <div id="menu"></div>
+    <div id="menu" class="menu-grid fade-in"></div>
   </div>
 
   <script>
@@ -32,39 +32,56 @@
     const role = currentUser.role;
     const menu = document.getElementById("menu");
 
-    // Role full akses
     if (role === "IT" || role === "CPM" || role === "Superuser") {
       menu.innerHTML = `
-        <a href="form.html">Input Form</a><br>
-        <a href="list-approve.html">List Approve</a><br>
-        <a href="list-data.html">List Data</a><br>
-        <a href="download.html">Download Excel</a>
+        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
+		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
+		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
+        <a href="list-approve.html" class="menu-card">✅ List Approve Tukar Shift/Off</a>
+		<a href="list-approve-lembur.html" class="menu-card">✅ List Approve Melemburkan</a>
+		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
+        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
+		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
+		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
+        <a href="download.html" class="menu-card">⬇️ Download Excel</a>
       `;
     }
 
-    // Admin
     if (role === "Admin") {
       menu.innerHTML = `
-        <a href="form.html">Input Form</a><br>
-        <a href="list-data.html">List Data</a><br>
-        <a href="download.html">Download Excel</a>
+        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
+		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
+		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
+        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
+		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
+		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
+		<a href="download.html" class="menu-card">⬇️ Download Excel</a>
+		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
       `;
     }
 
-    // Leader
     if (role === "Leader") {
       menu.innerHTML = `
-        <a href="form.html">Input Form</a><br>
-		<a href="list-data.html">List Data</a><br>
-        <a href="list-approve.html">List Approve</a>
+        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
+		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
+		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
+        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
+		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
+		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
+        <a href="list-approve.html" class="menu-card">✅ List Approve Tukar Shift/Off</a>
+		<a href="list-approve-lembur.html" class="menu-card">✅ List Approve Melemburkan</a>
+		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
       `;
     }
 
-    // Attendance
     if (role === "Attendance") {
       menu.innerHTML = `
-        <a href="form.html">Input Form</a><br>
-		<a href="list-data.html">List Data</a>
+        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
+		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
+		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
+        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
+		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
+		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
       `;
     }
   </script>

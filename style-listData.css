@@ -1,0 +1,160 @@
+body {
+  background: #f4f6f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+.container {
+  background: white;
+  max-width: 95%;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow-x: auto;
+}
+
+h1 {
+  color: #0077cc;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.styled-table thead tr {
+  background: linear-gradient(135deg, #0077cc, #0099ff);
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 10px 14px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.styled-table tbody tr:nth-child(even) {
+  background-color: #f9fbfd;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #eef6ff;
+  transition: background 0.2s ease-in-out;
+}
+
+/* Badge status */
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+.badge.pending {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+.badge.rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Tombol kecil di tabel */
+button.delete, 
+button.approve, 
+button.reject {
+  padding: 5px 10px;
+  font-size: 11px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: transform 0.15s ease-in-out;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button.delete {
+  background: #6b7280;
+}
+button.delete:hover {
+  background: #4b5563;
+}
+button.approve {
+  background: #10b981;
+}
+button.approve:hover {
+  background: #059669;
+}
+button.reject {
+  background: #ef4444;
+}
+button.reject:hover {
+  background: #dc2626;
+}
+
+/* Navigasi bawah */
+.nav-links {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.nav-links a {
+  background: #f3f4f6;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: #0077cc;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: background 0.2s;
+}
+
+.nav-links a:hover {
+  background: #e0f2fe;
+  text-decoration: none;
+}
+
+/* Responsif untuk HP */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 20px;
+  }
+  .styled-table th,
+  .styled-table td {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  button {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+}

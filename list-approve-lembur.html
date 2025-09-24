@@ -2,12 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>List Approve Tukar Shift/Off</title>
+  <title>List Approve Melemburkan</title>
   <link rel="stylesheet" href="style-listApprove.css">
 </head>
 <body>
   <div class="container">
-    <h1>List Approve Tukar Shift/Off</h1>
+    <h1>List Approve Melemburkan</h1>
     <div class="table-responsive">
       <table id="approveTable" class="styled-table">
         <thead>
@@ -15,10 +15,9 @@
             <th>No</th>
             <th>Nama</th>
             <th>Jabatan</th>
-            <th>Shift Dari</th>
-            <th>Shift Menjadi</th>
-            <th>Tukar Off</th>
-            <th>Tanggal</th>
+            <th>Shift</th>
+            <th>Dilemburkan Oleh</th>
+            <th>Tanggal Melemburkan</th>
             <th>User Approve</th>
             <th>Tanggal Approve</th>
             <th>Approve</th>
@@ -58,7 +57,7 @@
       const tbody = document.querySelector('#approveTable tbody');
       tbody.innerHTML = '';
 
-      const snapshot = await getDocs(collection(db, "shiftData"));
+      const snapshot = await getDocs(collection(db, "lemburData"));
       let i = 1;
       snapshot.forEach(docSnap => {
         const d = docSnap.data();
@@ -68,9 +67,8 @@
             <td>${i++}</td>
             <td>${d.nama}</td>
             <td>${d.jabatan}</td>
-            <td>${d.shift_dari || "-"}</td>
-            <td>${d.shift_menjadi || "-"}</td>
-            <td>${d.tukar_off || "-"}</td>
+            <td>${d.shift || ""}</td>
+            <td>${d.dilemburkan_oleh}</td>
             <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
             <td>${d.approvedBy || "-"}</td>
             <td>${d.approveDate || "-"}</td>
@@ -84,7 +82,7 @@
     }
 
     window.approveData = async function(id) {
-      await updateDoc(doc(db, "shiftData", id), { 
+      await updateDoc(doc(db, "lemburData", id), { 
         approve: true, 
         approvedBy: currentUser.username,
         approveDate: new Date().toLocaleString("id-ID")
@@ -96,14 +94,14 @@
     window.rejectData = async function(id) {
       const reason = prompt("Masukkan alasan reject:");
       if (!reason) return;
-      await updateDoc(doc(db, "shiftData", id), { reject: true, reason });
+      await updateDoc(doc(db, "lemburData", id), { reject: true, reason });
       alert("Data telah di-reject!");
       renderTable();
     };
 
     window.deleteData = async function(id) {
       if (confirm("Yakin ingin menghapus data ini?")) {
-        await deleteDoc(doc(db, "shiftData", id));
+        await deleteDoc(doc(db, "lemburData", id));
         alert("Data telah dihapus!");
         renderTable();
       }
