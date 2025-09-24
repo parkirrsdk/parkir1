@@ -13,12 +13,16 @@
         <thead>
           <tr>
             <th>No</th>
-            <th>Nama</th>
-            <th>Jabatan</th>
-            <th>Shift Dari</th>
-            <th>Shift Menjadi</th>
-            <th>Tukar Off</th>
-            <th>Tanggal</th>
+            <th>Nama 1</th>
+            <th>Nama 2</th>
+            <th>Shift Dari 1</th>
+            <th>Shift Menjadi 1</th>
+            <th>Tukar OFF 1</th>
+            <th>Shift Dari 2</th>
+            <th>Shift Menjadi 2</th>
+            <th>Tukar OFF 2</th>
+            <th>Leader</th>
+            <th>Tanggal Tukar Shift</th>
             <th>Status Approve</th>
             <th>Status Reject</th>
             <th>Reason</th>
@@ -80,11 +84,15 @@
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${i++}</td>
-          <td>${d.nama}</td>
-          <td>${d.jabatan}</td>
-          <td>${d.shift_dari || "-"}</td>
-          <td>${d.shift_menjadi || "-"}</td>
-          <td>${d.tukar_off || "-"}</td>
+          <td>${d.nama1 || ""}</td>
+          <td>${d.nama2 || ""}</td>
+          <td>${d.shift_dari1 || ""}</td>
+          <td>${d.shift_menjadi1 || ""}</td>
+          <td>${d.jadwal_off1 || ""}</td>
+          <td>${d.shift_dari2 || ""}</td>
+          <td>${d.shift_menjadi2 || ""}</td>
+          <td>${d.jadwal_off2 || ""}</td>
+          <td>${d.leader || ""}</td>
           <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
           <td><span class="badge ${d.approve ? 'approved' : 'pending'}">${d.approve ? "Approved" : "Pending"}</span></td>
           <td><span class="badge ${d.reject ? 'rejected' : 'pending'}">${d.reject ? "Rejected" : "-"}</span></td>
