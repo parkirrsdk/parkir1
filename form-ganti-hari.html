@@ -23,8 +23,8 @@
           <a href="form-lembur.html" id="melemburkanLink" class="sidebar-link">Form Melemburkan</a>
           <a href="form-ganti-hari.html" id="gantihariLink" class="sidebar-link">Form Pengantian Hari</a>
           <a href="list-data.html" id="dataLink" class="sidebar-link">List Data Tukar Shift/Off</a>
-		  <a href="list-data-lembur.html" id="datalemburLink" class="sidebar-link">List Data Melemburkan</a>
-		  <a href="list-data-ganti-hari.html" id="datagantihariLink" class="sidebar-link">List Data Ganti Hari</a>
+          <a href="list-data-lembur.html" id="datalemburLink" class="sidebar-link">List Data Melemburkan</a>
+          <a href="list-data-ganti-hari.html" id="datagantihariLink" class="sidebar-link">List Data Ganti Hari</a>
           <a href="download.html" id="downloadLink" class="sidebar-link">Download Excel</a>
         </nav>
       </div>
@@ -131,16 +131,13 @@
     }
     window.logout = logout;
 
- 
- // role access
+    // role access tanpa approveLink
     const role = currentUser.role;
-    if (role === "Admin") document.getElementById("approveLink").style.display = "none";
     if (role === "Leader") {
       document.getElementById("dataLink").style.display = "none";
       document.getElementById("downloadLink").style.display = "none";
     }
     if (role === "Attendance") {
-      document.getElementById("approveLink").style.display = "none";
       document.getElementById("dataLink").style.display = "none";
       document.getElementById("downloadLink").style.display = "none";
     }
