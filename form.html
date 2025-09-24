@@ -8,7 +8,7 @@
 <body>
   <div class="form-layout">
 
-    <!-- SIDEBAR (25%) -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" aria-label="Sidebar navigasi">
       <div class="sidebar-top">
         <div class="brand">
@@ -18,18 +18,16 @@
             <div class="brand-sub">Panel Input</div>
           </div>
         </div>
-
         <nav class="sidebar-nav">
-		  <a href="form.html" id="tukarshiftLink" class="sidebar-link">Form Tukar Shift/Off</a>
+          <a href="form.html" id="tukarshiftLink" class="sidebar-link">Form Tukar Shift/Off</a>
           <a href="form-lembur.html" id="melemburkanLink" class="sidebar-link">Form Melemburkan</a>
           <a href="form-ganti-hari.html" id="gantihariLink" class="sidebar-link">Form Pengantian Hari</a>
           <a href="list-data.html" id="dataLink" class="sidebar-link">List Data Tukar Shift/Off</a>
-		  <a href="list-data-lembur.html" id="datalemburLink" class="sidebar-link">List Data Melemburkan</a>
-		  <a href="list-data-ganti-hari.html" id="datagantihariLink" class="sidebar-link">List Data Ganti Hari</a>
+          <a href="list-data-lembur.html" id="datalemburLink" class="sidebar-link">List Data Melemburkan</a>
+          <a href="list-data-ganti-hari.html" id="datagantihariLink" class="sidebar-link">List Data Ganti Hari</a>
           <a href="download.html" id="downloadLink" class="sidebar-link">Download Excel</a>
         </nav>
       </div>
-
       <div class="sidebar-bottom">
         <button class="btn-logout" onclick="logout()">Logout</button>
       </div>
@@ -56,7 +54,6 @@
           <label>JADWAL OFF</label>
           <input type="text" name="jadwal_off1">
         
-
           <h2>PIHAK 2</h2>
           <label>NAMA</label>
           <input type="text" name="nama2" required>
@@ -69,7 +66,6 @@
           <label>JADWAL OFF</label>
           <input type="text" name="jadwal_off2">
          
-
           <h2>Detail Lain</h2>
           <label>TANGGAL TUKAR SHIFT / OFF</label>
           <input type="date" id="dateHelper" name="tanggal_shift" required>
@@ -104,7 +100,6 @@
         </form>
       </section>
     </main>
-
   </div>
 
   <!-- Firebase + app script -->
@@ -137,20 +132,17 @@
 
     // sidebar link visibility based on role
     const role = currentUser.role;
-	const tukarshiftLink = document.getElementById("tukarshiftLink");
+    const tukarshiftLink = document.getElementById("tukarshiftLink");
     const melemburkanLink = document.getElementById("melemburkanLink");
     const gantihariLink = document.getElementById("gantihariLink");
-    const approveLink = document.getElementById("approveLink");
     const dataLink = document.getElementById("dataLink");
     const downloadLink = document.getElementById("downloadLink");
 
-    if (role === "Admin") approveLink.style.display = "none";
     if (role === "Leader") {
       dataLink.style.display = "none";
       downloadLink.style.display = "none";
     }
     if (role === "Attendance") {
-      approveLink.style.display = "none";
       dataLink.style.display = "none";
       downloadLink.style.display = "none";
     }
