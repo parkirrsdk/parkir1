@@ -33,8 +33,19 @@
     <!-- Navigasi link -->
     <div class="nav-links">
       <a href="download.html">Download Excel</a>
-	  <a href="index.html">Dasboard</a>
-    </div>
+	  <a href="index.html">Dashboard</a>
+    
+  <a href="#" onclick="logout()">Logout</a>
+</div>
+
+<script>
+  function logout() {
+    localStorage.removeItem("currentUser");
+    alert("Anda berhasil logout!");
+    window.location.href = "login.html";
+  }
+</script>
+
   </div>
 
   <script type="module">
