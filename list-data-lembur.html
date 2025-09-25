@@ -8,6 +8,9 @@
 <body>
   <div class="container">
     <h1>List Data Melemburkan</h1>
+    
+<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="searchTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+
     <div class="table-responsive">
       <table id="dataTable" class="styled-table">
         <thead>
@@ -33,7 +36,7 @@
     <!-- Navigasi link -->
     <div class="nav-links">
       <a href="download.html">Download Excel</a>
-	  <a href="index.html">Dashboard</a>
+	  <a href="index.html">Dasboard</a>
     
   <a href="#" onclick="logout()">Logout</a>
 </div>
@@ -115,5 +118,26 @@
 
     renderTable();
   </script>
+
+<script>
+  function searchTable() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let table = document.querySelector("table");
+    let trs = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < trs.length; i++) { // skip header row
+      let tds = trs[i].getElementsByTagName("td");
+      let show = false;
+      for (let j = 0; j < tds.length; j++) {
+        if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
+          show = true;
+          break;
+        }
+      }
+      trs[i].style.display = show ? "" : "none";
+    }
+  }
+</script>
+
 </body>
 </html>
