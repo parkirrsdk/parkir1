@@ -37,6 +37,7 @@
     <main class="content" role="main">
       <header class="content-header">
         <h1>Form Tukar Shift / OFF</h1>
+  <div id="userInfo" class="user-info"></div>
         <p id="notif" class="notif-area" aria-live="polite"></p>
       </header>
 
@@ -123,6 +124,12 @@
     if (!currentUser) {
       window.location.href = "index.html";
     }
+
+// tampilkan identitas user di kanan atas
+const userInfoDiv = document.getElementById("userInfo");
+if (userInfoDiv && currentUser) {
+  userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
+}
 
     function logout() {
       localStorage.removeItem("currentUser");
