@@ -9,7 +9,111 @@
   align-items: center;
   justify-content: center;
 }
+body.login-body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: #609ff5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
 
+.login-container { max-width: 420px; width: 100%; padding: 16px; }
+.login-card {
+  background: #fff;
+  padding: 22px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+}
+.login-title { margin: 0 0 12px 0; font-size: 20px; color: #0f172a; }
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e6e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.login-form input[type="text"] { margin-bottom: 12px; }
+
+/* ===== Tambahan untuk fitur tampilkan password (SVG eye) ===== */
+.pw-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* make the password input expand to fill available space */
+.pw-row input[type="password"],
+.pw-row input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* eye button that contains two inline SVGs (open/closed) */
+.eye-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 36px;
+  padding: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* subtle hover/focus */
+.eye-btn:hover, .eye-btn:focus {
+  background: rgba(2,6,23,0.04);
+  outline: none;
+  border-color: rgba(2,6,23,0.04);
+}
+
+/* SVG sizing */
+.eye-btn svg { width: 18px; height: 18px; display: block; }
+
+/* we include both icons in the button; control visibility via class */
+.eye-btn .svg-open { display: none; }   /* open-eye hidden by default (password hidden) */
+.eye-btn .svg-closed { display: block; }/* closed-eye shown by default */
+
+.eye-btn.visible .svg-open { display: block; }   /* when visible, show open eye */
+.eye-btn.visible .svg-closed { display: none; }  /* hide closed eye */
+
+/* checkbox label */
+.show-pw {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  user-select: none;
+}
+
+/* login button */
+.btn-login {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #0b5fff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* notification */
+#error, #notif { margin-top: 10px; font-size: 13px; color: #b91c1c; }
+
+/* small responsive fix */
+@media (max-width: 420px) {
+  .eye-btn { width: 36px; height: 34px; }
+}
 .login-container {
   width: 100%;
   max-width: 360px;

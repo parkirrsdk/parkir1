@@ -46,16 +46,30 @@
     const showCheckbox = document.getElementById("showPassword");
     const toggleEye = document.getElementById("toggleEye");
 
+    function updateEyeState(isText) {
+      // toggle visual icons by class
+      if (isText) {
+        toggleEye.classList.add('visible');
+        toggleEye.setAttribute('aria-label', 'Sembunyikan password');
+      } else {
+        toggleEye.classList.remove('visible');
+        toggleEye.setAttribute('aria-label', 'Tampilkan password');
+      }
+    }
+
+    // Checkbox toggles
     showCheckbox.addEventListener('change', () => {
-      passwordInput.type = showCheckbox.checked ? 'text' : 'password';
-      toggleEye.setAttribute('aria-label', showCheckbox.checked ? 'Sembunyikan password' : 'Tampilkan password');
+      const makeText = showCheckbox.checked;
+      passwordInput.type = makeText ? 'text' : 'password';
+      updateEyeState(makeText);
     });
 
+    // Eye button toggles and keeps checkbox in sync
     toggleEye.addEventListener('click', () => {
       const isText = passwordInput.type === 'text';
       passwordInput.type = isText ? 'password' : 'text';
       showCheckbox.checked = !isText;
-      toggleEye.setAttribute('aria-label', !isText ? 'Sembunyikan password' : 'Tampilkan password');
+      updateEyeState(!isText);
     });
 
     loginForm.onsubmit = function(e) {
