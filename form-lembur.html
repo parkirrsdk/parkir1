@@ -7,7 +7,6 @@
 </head>
 <body>
   <div class="form-layout">
-
     <!-- SIDEBAR -->
     <aside class="sidebar" aria-label="Sidebar navigasi">
       <div class="sidebar-top">
@@ -34,7 +33,7 @@
     <main class="content" role="main">
       <header class="content-header">
         <h1>Form Melemburkan</h1>
-  <div id="userInfo" class="user-info"></div>
+        <div id="userInfo" class="user-info"></div>
         <p id="notif" class="notif-area" aria-live="polite"></p>
       </header>
 
@@ -107,37 +106,12 @@
       window.location.href = "index.html";
     }
 
-// tampilkan identitas user di kanan atas
-const userInfoDiv = document.getElementById("userInfo");
-if (userInfoDiv && currentUser) {
-  userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
-}
+    const userInfoDiv = document.getElementById("userInfo");
+    if (userInfoDiv && currentUser) {
+      userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
+    }
     window.logout = logout;
 
-    // role access
-    const role = currentUser.role;
-    if (role === "Leader") {
-      document.getElementById("dataLink").style.display = "none";
-      document.getElementById("downloadLink").style.display = "none";
-    }
-    if (role === "Attendance") {
-      document.getElementById("dataLink").style.display = "none";
-      document.getElementById("downloadLink").style.display = "none";
-    }
-
-    // auto-fill hari/tanggal/bulan/tahun from dateHelper
-    const hariList = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-    document.getElementById("dateHelper").addEventListener("change", (e) => {
-      const dateVal = e.target.value;
-      if (!dateVal) return;
-      const d = new Date(dateVal);
-      document.getElementById("hari").value = hariList[d.getDay()];
-      document.getElementById("tanggal").value = d.getDate();
-      document.getElementById("bulan").value = d.getMonth() + 1;
-      document.getElementById("tahun").value = d.getFullYear();
-    });
-
-    // submit -> Firebase lemburData
     document.getElementById("lemburForm").onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
@@ -156,6 +130,23 @@ if (userInfoDiv && currentUser) {
         document.getElementById("notif").className = "notif-area error";
       }
     };
+  </script>
+
+  <!-- Auto isi tanggal -->
+  <script>
+    function isiTanggalOtomatis(dateInputId, hariId, tanggalId, bulanId, tahunId) {
+      const dateInput = document.getElementById(dateInputId);
+      dateInput.addEventListener("change", function () {
+        if (!this.value) return;
+        const d = new Date(this.value);
+        const namaHari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+        document.getElementById(hariId).value = namaHari[d.getDay()];
+        document.getElementById(tanggalId).value = d.getDate();
+        document.getElementById(bulanId).value = d.getMonth() + 1;
+        document.getElementById(tahunId).value = d.getFullYear();
+      });
+    }
+    isiTanggalOtomatis("dateHelper","hari","tanggal","bulan","tahun");
   </script>
 </body>
 </html>
