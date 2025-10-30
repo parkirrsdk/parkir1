@@ -151,18 +151,7 @@ if (userInfoDiv && currentUser) {
       downloadLink.style.display = "none";
     }
 
-    // auto-fill hari/tanggal/bulan/tahun from dateHelper
-    const hariList = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
-    document.getElementById("dateHelper").addEventListener("change", (e) => {
-      const dateVal = e.target.value;
-      if (!dateVal) return;
-      const d = new Date(dateVal);
-      document.getElementById("hari").value = hariList[d.getDay()];
-      document.getElementById("tanggal").value = d.getDate();
-      document.getElementById("bulan").value = d.getMonth() + 1;
-      document.getElementById("tahun").value = d.getFullYear();
-    });
-
+    
     // submit form -> Firebase
     document.getElementById('shiftForm').onsubmit = async function(e) {
       e.preventDefault();
@@ -187,6 +176,23 @@ if (userInfoDiv && currentUser) {
         document.getElementById('notif').classList.add('error');
       }
     };
+  </script>
+  
+  <!-- Auto isi tanggal -->
+  <script>
+    function isiTanggalOtomatis(dateInputId, hariId, tanggalId, bulanId, tahunId) {
+      const dateInput = document.getElementById(dateInputId);
+      dateInput.addEventListener("change", function () {
+        if (!this.value) return;
+        const d = new Date(this.value);
+        const namaHari = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+        document.getElementById(hariId).value = namaHari[d.getDay()];
+        document.getElementById(tanggalId).value = d.getDate();
+        document.getElementById(bulanId).value = d.getMonth() + 1;
+        document.getElementById(tahunId).value = d.getFullYear();
+      });
+    }
+    isiTanggalOtomatis("dateHelper","hari","tanggal","bulan","tahun");
   </script>
 </body>
 </html>
