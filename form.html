@@ -30,11 +30,11 @@
       </div>
     </aside>
 
-    <!-- CONTENT (75%) -->
+    <!-- CONTENT -->
     <main class="content" role="main">
       <header class="content-header">
         <h1>Form Tukar Shift / OFF</h1>
-  <div id="userInfo" class="user-info"></div>
+        <div id="userInfo" class="user-info"></div>
         <p id="notif" class="notif-area" aria-live="polite"></p>
       </header>
 
@@ -51,7 +51,7 @@
           <input type="text" name="shift_menjadi1" required>
           <label>JADWAL OFF</label>
           <input type="text" name="jadwal_off1">
-        
+
           <h2>PIHAK 2</h2>
           <label>NAMA</label>
           <input type="text" name="nama2" required>
@@ -63,7 +63,7 @@
           <input type="text" name="shift_menjadi2" required>
           <label>JADWAL OFF</label>
           <input type="text" name="jadwal_off2">
-         
+
           <h2>Detail Lain</h2>
           <label>TANGGAL TUKAR SHIFT / OFF</label>
           <input type="date" id="dateHelper" name="tanggal_shift" required>
@@ -122,11 +122,10 @@
       window.location.href = "index.html";
     }
 
-// tampilkan identitas user di kanan atas
-const userInfoDiv = document.getElementById("userInfo");
-if (userInfoDiv && currentUser) {
-  userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
-}
+    const userInfoDiv = document.getElementById("userInfo");
+    if (userInfoDiv && currentUser) {
+      userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
+    }
 
     function logout() {
       localStorage.removeItem("currentUser");
@@ -134,50 +133,37 @@ if (userInfoDiv && currentUser) {
     }
     window.logout = logout;
 
-    // sidebar link visibility based on role
     const role = currentUser.role;
-    const tukarshiftLink = document.getElementById("tukarshiftLink");
-    const melemburkanLink = document.getElementById("melemburkanLink");
-    const gantihariLink = document.getElementById("gantihariLink");
     const dataLink = document.getElementById("dataLink");
     const downloadLink = document.getElementById("downloadLink");
-
-    if (role === "Leader") {
-      dataLink.style.display = "none";
-      downloadLink.style.display = "none";
-    }
-    if (role === "Attendance") {
-      dataLink.style.display = "none";
-      downloadLink.style.display = "none";
+    if (role === "Leader" || role === "Attendance") {
+      if (dataLink) dataLink.style.display = "none";
+      if (downloadLink) downloadLink.style.display = "none";
     }
 
-    
-    // submit form -> Firebase
     document.getElementById('shiftForm').onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
       const obj = { approve: false };
-      [...form.elements].forEach(el => {
-        if (el.name) obj[el.name] = el.value;
-      });
+      [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
 
       try {
         await addDoc(collection(db, "shiftData"), obj);
-        document.getElementById('notif').innerText = "✅ Data berhasil disimpan ke Firebase!";
+        document.getElementById('notif').innerText = "✅ Data berhasil disimpan!";
         document.getElementById('notif').classList.remove('error');
         document.getElementById('notif').classList.add('success');
         form.reset();
       } catch (err) {
-        console.error("Error:", err);
+        console.error(err);
         document.getElementById('notif').innerText = "❌ Gagal simpan data!";
         document.getElementById('notif').classList.remove('success');
         document.getElementById('notif').classList.add('error');
       }
     };
   </script>
-  
+
   <!-- Auto isi tanggal -->
   <script>
     function isiTanggalOtomatis(dateInputId, hariId, tanggalId, bulanId, tahunId) {
