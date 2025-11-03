@@ -32,20 +32,6 @@
     const role = currentUser.role;
     const menu = document.getElementById("menu");
 
-
-// 🔹 Ambil jumlah pengajuan belum di-approve dari localStorage (atau database)
-const pendingTukar = JSON.parse(localStorage.getItem("dataTukarShift") || "[]")
-  .filter(item => item.status === "Pending").length;
-const pendingLembur = JSON.parse(localStorage.getItem("dataLembur") || "[]")
-  .filter(item => item.status === "Pending").length;
-const pendingGanti = JSON.parse(localStorage.getItem("dataGantiHari") || "[]")
-  .filter(item => item.status === "Pending").length;
-
-// 🔹 Fungsi untuk buat badge angka merah
-function badge(count) {
-  return count > 0 ? ` <span class="badge">${count}</span>` : "";
-}
-
     if (role === "IT" || role === "CPM" || role === "Superuser") {
       menu.innerHTML = `
         <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
