@@ -8,8 +8,15 @@
 <body>
   <div class="container">
     <h1>List Data Tukar Shift/Off</h1>
-    
-<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="searchTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+
+<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="filterTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+<select id="filterApprove" onchange="filterTable()" style="margin-left:10px; padding:5px;">
+  <option value="">Semua Status</option>
+  <option value="Approved">Approved</option>
+  <option value="Pending">Pending</option>
+  <option value="Rejected">Rejected</option>
+</select>
+<input type="date" id="filterTanggal" onchange="filterTable()" style="margin-left:10px; padding:5px;">
 
     <div class="table-responsive">
       <table id="dataTable" class="styled-table">
@@ -38,13 +45,11 @@
       </table>
     </div>
 
-    <!-- Navigasi link -->
     <div class="nav-links">
       <a href="download.html">Download Excel</a>
-	  <a href="index.html">Dashboard</a>
-    
-  <a href="#" onclick="logout()">Logout</a>
-</div>
+      <a href="index.html">Dashboard</a>
+      <a href="#" onclick="logout()">Logout</a>
+    </div>
 
 <script>
   function logout() {
@@ -74,6 +79,15 @@
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
     const role = currentUser ? currentUser.role : "";
 
+    function dateValueShift(d){
+      // build timestamp from tahun/bulan/tanggal (fallback null)
+      const y = Number(d?.tahun);
+      const m = Number(d?.bulan);
+      const day = Number(d?.tanggal);
+      if (!y || !m || !day) return null;
+      return new Date(y, m-1, day).getTime();
+    }
+
     async function renderTable() {
       const tbody = document.querySelector('#dataTable tbody');
       tbody.innerHTML = '';
@@ -86,11 +100,20 @@
         rows.push({ id: docSnap.id, ...d });
       });
 
-      // Urutkan: yang pending tampil dulu
-      rows.sort((a, b) => {
-        if (!a.approve && !a.reject && (b.approve || b.reject)) return -1;
-        if (!b.approve && !b.reject && (a.approve || a.reject)) return 1;
-        return 0;
+      // Sort: 1) pending (belum approve & belum reject) di atas
+      //       2) kemudian urut berdasarkan tanggal tukar shift (tanggal/bulan/tahun) ascending
+      rows.sort((a,b) => {
+        const aPending = !a.approve && !a.reject;
+        const bPending = !b.approve && !b.reject;
+        if (aPending && !bPending) return -1;
+        if (!aPending && bPending) return 1;
+
+        const da = dateValueShift(a);
+        const dbv = dateValueShift(b);
+        if (da === null && dbv === null) return 0;
+        if (da === null) return 1; // let missing dates go to bottom
+        if (dbv === null) return -1;
+        return da - dbv;
       });
 
       rows.forEach(d => {
@@ -130,23 +153,40 @@
   </script>
 
 <script>
-  function searchTable() {
-    let input = document.getElementById("searchInput").value.toLowerCase();
-    let table = document.querySelector("table");
-    let trs = table.getElementsByTagName("tr");
+function filterTable() {
+  let approveFilter = document.getElementById("filterApprove").value.toLowerCase();
+  let tanggalFilter = document.getElementById("filterTanggal").value;
+  let input = document.getElementById("searchInput").value.toLowerCase();
+  let trs = document.querySelectorAll("#dataTable tbody tr");
 
-    for (let i = 1; i < trs.length; i++) { // skip header row
-      let tds = trs[i].getElementsByTagName("td");
-      let show = false;
-      for (let j = 0; j < tds.length; j++) {
-        if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
-          show = true;
-          break;
-        }
-      }
-      trs[i].style.display = show ? "" : "none";
+  trs.forEach(tr => {
+    let tds = tr.getElementsByTagName("td");
+    let show = true;
+
+    if (input && !Array.from(tds).some(td => td.innerText.toLowerCase().includes(input))) {
+      show = false;
     }
-  }
+    if (approveFilter) {
+      let statusText = tds[11]?.innerText.toLowerCase() || "";
+      let rejectText = tds[12]?.innerText.toLowerCase() || "";
+      if (approveFilter === "approved" && !statusText.includes("approved")) show = false;
+      if (approveFilter === "pending" && !(statusText.includes("pending") || rejectText.includes("-"))) show = false;
+      if (approveFilter === "rejected" && !rejectText.includes("rejected")) show = false;
+    }
+    if (tanggalFilter) {
+      let tanggalText = tds[10]?.innerText || "";
+      let match = tanggalText.match(/\d{1,2}-\d{1,2}-\d{4}/);
+      if (match) {
+        let [d, m, y] = match[0].split("-");
+        let formatted = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        if (formatted !== tanggalFilter) show = false;
+      } else {
+        show = false;
+      }
+    }
+    tr.style.display = show ? "" : "none";
+  });
+}
 </script>
 
 </body>
