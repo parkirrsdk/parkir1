@@ -9,19 +9,21 @@
   <div class="container">
     <h1>List Data Ganti Hari</h1>
 
-<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="filterTable()" style="margin-bottom:10px; padding:5px; width:250px;">
-<select id="filterApprove" onchange="filterTable()" style="margin-left:10px; padding:5px;">
-  <option value="">Semua Status</option>
-  <option value="Approved">Approved</option>
-  <option value="Pending">Pending</option>
-  <option value="Rejected">Rejected</option>
-</select>
-<input type="date" id="filterTanggal" onchange="filterTable()" style="margin-left:10px; padding:5px;">
+    <input type="text" id="searchInput" placeholder="Cari data..." onkeyup="filterTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+    <select id="filterApprove" onchange="filterTable()" style="margin-left:10px; padding:5px;">
+      <option value="">Semua Status</option>
+      <option value="Approved">Approved</option>
+      <option value="Pending">Pending</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+    <input type="date" id="filterTanggal" onchange="filterTable()" style="margin-left:10px; padding:5px;">
 
+    <button id="deleteSelected" style="margin:10px 0; display:none;" onclick="deleteSelectedRows()">Delete Selected</button>
     <div class="table-responsive">
       <table id="dataTable" class="styled-table">
         <thead>
           <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" /></th>
             <th>No</th>
             <th>Nama</th>
             <th>Jabatan</th>
@@ -46,144 +48,179 @@
       <a href="#" onclick="logout()">Logout</a>
     </div>
 
-<script>
-function logout() {
-  localStorage.removeItem("currentUser");
-  alert("Anda berhasil logout!");
-  window.location.href = "login.html";
-}
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
-  authDomain: "shift-app-b73fd.firebaseapp.com",
-  projectId: "shift-app-b73fd",
-  storageBucket: "shift-app-b73fd.firebasestorage.app",
-  messagingSenderId: "408848137650",
-  appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-const role = currentUser ? currentUser.role : "";
-
-function dateValueGanti(d){
-  const y = Number(d?.tahun_ganti);
-  const m = Number(d?.bulan_ganti);
-  const day = Number(d?.tanggal_ganti);
-  if (!y || !m || !day) return null;
-  return new Date(y, m-1, day).getTime();
-}
-
-async function renderTable() {
-  const tbody = document.querySelector('#dataTable tbody');
-  tbody.innerHTML = '';
-
-  const querySnapshot = await getDocs(collection(db, "gantiHariData"));
-  let i = 1;
-  const rows = [];
-  querySnapshot.forEach(docSnap => {
-    const d = docSnap.data();
-    rows.push({ id: docSnap.id, ...d });
-  });
-
-  // Sort: pending first, then by tanggal_ganti ascending
-  rows.sort((a,b) => {
-    const aPending = !a.approve && !a.reject;
-    const bPending = !b.approve && !b.reject;
-    if (aPending && !bPending) return -1;
-    if (!aPending && bPending) return 1;
-
-    const da = dateValueGanti(a);
-    const dbv = dateValueGanti(b);
-    if (da === null && dbv === null) return 0;
-    if (da === null) return 1;
-    if (dbv === null) return -1;
-    return da - dbv;
-  });
-
-  rows.forEach(d => {
-    let approvers = [];
-    if (d.leaderApprove && d.leaderBy) approvers.push(d.leaderBy);
-    if (d.adminApprove && d.adminBy) approvers.push(d.adminBy);
-    const approvedUsers = approvers.length > 0 ? approvers.join(", ") : "-";
-
-    let approveDates = [];
-    if (d.leaderApproveDate) approveDates.push(`Leader: ${d.leaderApproveDate}`);
-    if (d.adminApproveDate) approveDates.push(`Admin: ${d.adminApproveDate}`);
-    const approveDateText = approveDates.length > 0 ? approveDates.join("<br>") : "-";
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i++}</td>
-      <td>${d.nama}</td>
-      <td>${d.jabatan}</td>
-      <td>${d.dikarenakan}</td>
-      <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
-      <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
-      <td><span class="badge ${d.approve ? 'approved' : 'pending'}">${d.approve ? "Approved" : "Pending"}</span></td>
-      <td><span class="badge ${d.reject ? 'rejected' : 'pending'}">${d.reject ? "Rejected" : "-"}</span></td>
-      <td>${d.reason || "-"}</td>
-      <td>${approvedUsers}</td>
-      <td>${approveDateText}</td>
-      <td>${role === "Superuser" ? `<button class="delete" onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-window.deleteData = async function(id) {
-  if (confirm("Yakin ingin menghapus data ini?")) {
-    await deleteDoc(doc(db, "gantiHariData", id));
-    alert("Data telah dihapus!");
-    renderTable();
-  }
-};
-
-renderTable();
-</script>
-
-<script>
-function filterTable() {
-  let approveFilter = document.getElementById("filterApprove").value.toLowerCase();
-  let tanggalFilter = document.getElementById("filterTanggal").value;
-  let input = document.getElementById("searchInput").value.toLowerCase();
-  let trs = document.querySelectorAll("#dataTable tbody tr");
-
-  trs.forEach(tr => {
-    let tds = tr.getElementsByTagName("td");
-    let show = true;
-
-    if (input && !Array.from(tds).some(td => td.innerText.toLowerCase().includes(input))) {
-      show = false;
-    }
-    if (approveFilter) {
-      let statusText = tds[6]?.innerText.toLowerCase() || "";
-      let rejectText = tds[7]?.innerText.toLowerCase() || "";
-      if (approveFilter === "approved" && !statusText.includes("approved")) show = false;
-      if (approveFilter === "pending" && !(statusText.includes("pending") || rejectText.includes("-"))) show = false;
-      if (approveFilter === "rejected" && !rejectText.includes("rejected")) show = false;
-    }
-    if (tanggalFilter) {
-      let tanggalText = tds[5]?.innerText || "";
-      let match = tanggalText.match(/\d{1,2}-\d{1,2}-\d{4}/);
-      if (match) {
-        let [d, m, y] = match[0].split("-");
-        let formatted = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
-        if (formatted !== tanggalFilter) show = false;
-      } else {
-        show = false;
+    <script>
+      function logout() {
+        localStorage.removeItem("currentUser");
+        alert("Anda berhasil logout!");
+        window.location.href = "login.html";
       }
-    }
-    tr.style.display = show ? "" : "none";
-  });
-}
-</script>
+    </script>
 
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+      import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
+        authDomain: "shift-app-b73fd.firebaseapp.com",
+        projectId: "shift-app-b73fd",
+        storageBucket: "shift-app-b73fd.firebasestorage.app",
+        messagingSenderId: "408848137650",
+        appId: "1:408848137650:web:0ec055ed4d7524584cb8ab"
+      };
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+      const role = currentUser ? currentUser.role : "";
+
+      function dateValueGanti(d) {
+        const y = Number(d?.tahun_ganti);
+        const m = Number(d?.bulan_ganti);
+        const day = Number(d?.tanggal_ganti);
+        if (!y || !m || !day) return null;
+        return new Date(y, m - 1, day).getTime();
+      }
+
+      async function renderTable() {
+        const tbody = document.querySelector('#dataTable tbody');
+        tbody.innerHTML = '';
+
+        const querySnapshot = await getDocs(collection(db, "gantiHariData"));
+        let i = 1;
+        const rows = [];
+        querySnapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          rows.push({ id: docSnap.id, ...d });
+        });
+
+        rows.sort((a, b) => {
+          const aPending = !a.approve && !a.reject;
+          const bPending = !b.approve && !b.reject;
+          if (aPending && !bPending) return -1;
+          if (!aPending && bPending) return 1;
+
+          const da = dateValueGanti(a);
+          const dbv = dateValueGanti(b);
+          if (da === null && dbv === null) return 0;
+          if (da === null) return 1;
+          if (dbv === null) return -1;
+          return da - dbv;
+        });
+
+        rows.forEach(d => {
+          let approvers = [];
+          if (d.leaderApprove && d.leaderBy) approvers.push(d.leaderBy);
+          if (d.adminApprove && d.adminBy) approvers.push(d.adminBy);
+          const approvedUsers = approvers.length > 0 ? approvers.join(", ") : "-";
+
+          let approveDates = [];
+          if (d.leaderApproveDate) approveDates.push(`Leader: ${d.leaderApproveDate}`);
+          if (d.adminApproveDate) approveDates.push(`Admin: ${d.adminApproveDate}`);
+          const approveDateText = approveDates.length > 0 ? approveDates.join("<br>") : "-";
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${role === "Superuser" ? `<input type="checkbox" class="row-checkbox" data-id="${d.id}" onchange="updateDeleteBtn()">` : ""}</td>
+            <td>${i++}</td>
+            <td>${d.nama}</td>
+            <td>${d.jabatan}</td>
+            <td>${d.dikarenakan}</td>
+            <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
+            <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
+            <td><span class="badge ${d.approve ? 'approved' : 'pending'}">${d.approve ? "Approved" : "Pending"}</span></td>
+            <td><span class="badge ${d.reject ? 'rejected' : 'pending'}">${d.reject ? "Rejected" : "-"}</span></td>
+            <td>${d.reason || "-"}</td>
+            <td>${approvedUsers}</td>
+            <td>${approveDateText}</td>
+            <td>${role === "Superuser" ? `<button class="delete" onclick="deleteData('${d.id}')">Delete</button>` : ""}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        updateDeleteBtn();
+        filterTable();
+      }
+
+      window.deleteData = async function (id) {
+        if (confirm("Yakin ingin menghapus data ini?")) {
+          await deleteDoc(doc(db, "gantiHariData", id));
+          alert("Data telah dihapus!");
+          renderTable();
+        }
+      };
+
+      window.deleteSelectedRows = async function () {
+        const checkboxes = document.querySelectorAll(".row-checkbox:checked");
+        if (checkboxes.length === 0) return;
+        if (!confirm('Yakin ingin menghapus data terpilih?')) return;
+        for (let c of checkboxes) {
+          const id = c.getAttribute('data-id');
+          await deleteDoc(doc(db, "gantiHariData", id));
+        }
+        alert("Data terpilih telah dihapus!");
+        renderTable();
+      };
+
+      window.toggleSelectAll = function (all) {
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        checkboxes.forEach(c => {
+          if (!c.closest('tr').style.display || c.closest('tr').style.display === "") {
+            c.checked = all.checked;
+          }
+        });
+        updateDeleteBtn();
+      };
+
+      window.updateDeleteBtn = function () {
+        const count = document.querySelectorAll('.row-checkbox:checked').length;
+        document.getElementById("deleteSelected").style.display = (count > 0) ? "inline-block" : "none";
+        const all = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll(".row-checkbox");
+        const shownCheckboxes = Array.from(checkboxes).filter(c => !c.closest('tr').style.display || c.closest('tr').style.display === "");
+        all.checked = shownCheckboxes.length && shownCheckboxes.every(c => c.checked);
+      };
+
+      renderTable();
+    </script>
+
+    <script>
+      function filterTable() {
+        let approveFilter = document.getElementById("filterApprove").value.toLowerCase();
+        let tanggalFilter = document.getElementById("filterTanggal").value;
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let trs = document.querySelectorAll("#dataTable tbody tr");
+
+        trs.forEach(tr => {
+          let tds = tr.getElementsByTagName("td");
+          let show = true;
+
+          if (input && !Array.from(tds).some(td => td.innerText.toLowerCase().includes(input))) {
+            show = false;
+          }
+          if (approveFilter) {
+            let statusText = tds[7]?.innerText.toLowerCase() || "";
+            let rejectText = tds[8]?.innerText.toLowerCase() || "";
+            if (approveFilter === "approved" && !statusText.includes("approved")) show = false;
+            if (approveFilter === "pending" && !(statusText.includes("pending") || rejectText.includes("-"))) show = false;
+            if (approveFilter === "rejected" && !rejectText.includes("rejected")) show = false;
+          }
+          if (tanggalFilter) {
+            let tanggalText = tds[6]?.innerText || "";
+            let match = tanggalText.match(/\d{1,2}-\d{1,2}-\d{4}/);
+            if (match) {
+              let [d, m, y] = match[0].split("-");
+              let formatted = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+              if (formatted !== tanggalFilter) show = false;
+            } else {
+              show = false;
+            }
+          }
+          tr.style.display = show ? "" : "none";
+        });
+        if (window.updateDeleteBtn) window.updateDeleteBtn();
+      }
+    </script>
+
+  </div>
 </body>
 </html>
