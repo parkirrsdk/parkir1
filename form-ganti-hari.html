@@ -34,7 +34,7 @@
     <main class="content" role="main">
       <header class="content-header">
         <h1>Form Penggantian Hari</h1>
-  <div id="userInfo" class="user-info"></div>
+        <div id="userInfo" class="user-info"></div>
         <p id="notif" class="notif-area" aria-live="polite"></p>
       </header>
 
@@ -46,7 +46,6 @@
           <label>JABATAN</label>
           <input type="text" name="jabatan" required>
 
-          <!-- Bagian tanggal awal -->
           <label>HARI & TANGGAL</label>
           <input type="date" id="dateAwal" name="tanggal_awal" required>
 
@@ -72,7 +71,6 @@
           <label>Alasan</label>
           <input type="text" name="dikarenakan" required>
 
-          <!-- Bagian tanggal pengganti -->
           <label>UNTUK MENGGANTIKAN HARI & TANGGAL</label>
           <input type="date" id="dateGanti" name="tanggal_ganti" required>
 
@@ -106,7 +104,7 @@
   <!-- Firebase + app script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
@@ -128,25 +126,23 @@
       window.location.href = "index.html";
     }
 
-// tampilkan identitas user di kanan atas
-const userInfoDiv = document.getElementById("userInfo");
-if (userInfoDiv && currentUser) {
-  userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
-}
+    const userInfoDiv = document.getElementById("userInfo");
+    if (userInfoDiv && currentUser) {
+      userInfoDiv.innerText = `👤 ${currentUser.role} - ${currentUser.username}`;
+    }
     window.logout = logout;
 
     // role access tanpa approveLink
     const role = currentUser.role;
     if (role === "Leader") {
-      document.getElementById("dataLink").style.display = "none";
-      document.getElementById("downloadLink").style.display = "none";
+      if(document.getElementById("dataLink")) document.getElementById("dataLink").style.display = "none";
+      if(document.getElementById("downloadLink")) document.getElementById("downloadLink").style.display = "none";
     }
     if (role === "Attendance") {
-      document.getElementById("dataLink").style.display = "none";
-      document.getElementById("downloadLink").style.display = "none";
+      if(document.getElementById("dataLink")) document.getElementById("dataLink").style.display = "none";
+      if(document.getElementById("downloadLink")) document.getElementById("downloadLink").style.display = "none";
     }
 
-    // submit -> Firebase gantiHariData
     document.getElementById("gantiHariForm").onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
@@ -154,8 +150,20 @@ if (userInfoDiv && currentUser) {
       [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
+
+      const col = collection(db, "gantiHariData");
+      // Validasi nama & tanggal_awal
+      const q = query(col, where("nama", "==", obj.nama), where("tanggal_awal", "==", obj.tanggal_awal));
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        document.getElementById("notif").innerText = "⚠️ Data sudah diinput sebelumnya mohon di cek di list data ganti hari!";
+        document.getElementById("notif").className = "notif-area error";
+        return;
+      }
+
       try {
-        await addDoc(collection(db, "gantiHariData"), obj);
+        await addDoc(col, obj);
         document.getElementById("notif").innerText = "✅ Data penggantian hari berhasil disimpan!";
         document.getElementById("notif").className = "notif-area success";
         form.reset();

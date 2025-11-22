@@ -84,7 +84,7 @@
   <!-- Firebase + app script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
@@ -119,8 +119,20 @@
       [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
+
+      const col = collection(db, "lemburData");
+      // Validasi nama & tanggal_lembur
+      const q = query(col, where("nama", "==", obj.nama), where("tanggal_lembur", "==", obj.tanggal_lembur));
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        document.getElementById("notif").innerText = "⚠️ Data sudah diinput sebelumnya mohon di cek di list data melemburkan!";
+        document.getElementById("notif").className = "notif-area error";
+        return;
+      }
+
       try {
-        await addDoc(collection(db, "lemburData"), obj);
+        await addDoc(col, obj);
         document.getElementById("notif").innerText = "✅ Data lembur berhasil disimpan!";
         document.getElementById("notif").className = "notif-area success";
         form.reset();

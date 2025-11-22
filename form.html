@@ -103,7 +103,7 @@
   <!-- Firebase + app script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAT5F4_ZJr_kj0TaUM_0wwwknv3bZwDaog",
@@ -118,9 +118,7 @@
     const db = getFirestore(app);
 
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    if (!currentUser) {
-      window.location.href = "index.html";
-    }
+    if (!currentUser) window.location.href = "index.html";
 
     const userInfoDiv = document.getElementById("userInfo");
     if (userInfoDiv && currentUser) {
@@ -149,8 +147,22 @@
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
 
+      const col = collection(db, "shiftData");
+      // Validasi nama1-AND-tanggal maupun nama2-AND-tanggal
+      const q1 = query(col, where("nama1", "==", obj.nama1), where("tanggal_shift", "==", obj.tanggal_shift));
+      const q2 = query(col, where("nama2", "==", obj.nama2), where("tanggal_shift", "==", obj.tanggal_shift));
+      const snap1 = await getDocs(q1);
+      const snap2 = await getDocs(q2);
+
+      if (!snap1.empty || !snap2.empty) {
+        document.getElementById('notif').innerText = "⚠️ Data sudah diinput sebelumnya mohon cek di list data tukar shif/off!";
+        document.getElementById('notif').classList.remove('success');
+        document.getElementById('notif').classList.add('error');
+        return;
+      }
+
       try {
-        await addDoc(collection(db, "shiftData"), obj);
+        await addDoc(col, obj);
         document.getElementById('notif').innerText = "✅ Data berhasil disimpan!";
         document.getElementById('notif').classList.remove('error');
         document.getElementById('notif').classList.add('success');
