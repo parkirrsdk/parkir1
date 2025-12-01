@@ -23,7 +23,7 @@
     </div>
   </div>
 
-  <script type="module">">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -40,7 +40,7 @@
 
     async function downloadExcel() {
       const workbook = new ExcelJS.Workbook();
-
+	};
       // ------------------- SHEET SHIFT/OFF -------------------
       const sheetShift = workbook.addWorksheet("Tukar Shift/Off");
       sheetShift.addRow([
@@ -136,3 +136,4 @@
   </script>
 </body>
 </html>
+
