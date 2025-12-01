@@ -17,10 +17,9 @@
     </label>
     <button id="downloadExcel">Download Excel</button>
     <br><br>
-    <!-- Navigasi link -->
-    <div class="nav-links">
-	  <a href="index.html">Dasboard</a>
-    </div>
+    <a href="form.html">Input Data</a> |
+    <a href="list-approve.html">List Approve</a> |
+    <a href="list-data.html">List Data</a>
   </div>
 
   <script type="module">
@@ -38,102 +37,189 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function downloadExcel() {
-      const workbook = new ExcelJS.Workbook();
-	};
-      // ------------------- SHEET SHIFT/OFF -------------------
-      const sheetShift = workbook.addWorksheet("Tukar Shift/Off");
-      sheetShift.addRow([
-        "No", "Nama", "Jabatan", "Shift Dari", "Shift Menjadi", "Tukar Off",
-        "Tanggal", "Status Approve", "Status Reject", "Reason",
-        "User Approve", "Tanggal Approve"
-      ]);
-
-      const shiftSnap = await getDocs(collection(db, "shiftData"));
-      let i = 1;
-      shiftSnap.forEach(doc => {
-        const d = doc.data();
-        sheetShift.addRow([
-          i++,
-          d.nama,
-          d.jabatan,
-          d.shift_dari || "-",
-          d.shift_menjadi || "-",
-          d.tukar_off || "-",
-          `${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}`,
-          d.approve ? "Approved" : "Pending",
-          d.reject ? "Rejected" : "-",
-          d.reason || "-",
-          d.approvedBy || "-",
-          d.approveDate || "-"
-        ]);
-      });
-
-      // ------------------- SHEET GANTI HARI -------------------
-      const sheetGantiHari = workbook.addWorksheet("Ganti Hari");
-      sheetGantiHari.addRow([
-        "No", "Nama", "Jabatan", "Alasan", "Tanggal", "Tanggal Pengganti Hari",
-        "Status Approve", "Status Reject", "Reason",
-        "User Approve", "Tanggal Approve Leader", "Tanggal Approve Admin"
-      ]);
-
-      const gantiHariSnap = await getDocs(collection(db, "gantiHariData"));
-      let j = 1;
-      gantiHariSnap.forEach(doc => {
-        const d = doc.data();
-        let approvers = [];
-        if (d.leaderApprove && d.leaderBy) approvers.push(d.leaderBy);
-        if (d.adminApprove && d.adminBy) approvers.push(d.adminBy);
-        const approvedUsers = approvers.length > 0 ? approvers.join(", ") : "-";
-
-        sheetGantiHari.addRow([
-          j++,
-          d.nama,
-          d.jabatan,
-          d.dikarenakan,
-          `${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}`,
-          `${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}`,
-          d.approve ? "Approved" : "Pending",
-          d.reject ? "Rejected" : "-",
-          d.reason || "-",
-          approvedUsers,
-          d.leaderApproveDate || "-",
-          d.adminApproveDate || "-"
-        ]);
-      });
-
-      // ------------------- SHEET LEMBUR -------------------
-      const sheetLembur = workbook.addWorksheet("Lembur");
-      sheetLembur.addRow([
-        "No", "Nama", "Jabatan", "Shift", "Dilemburkan Oleh", "Tanggal Melemburkan",
-        "Status Approve", "Status Reject", "Reason",
-        "User Approve", "Tanggal Approve"
-      ]);
-
-      const lemburSnap = await getDocs(collection(db, "lemburData"));
-      let k = 1;
-      lemburSnap.forEach(doc => {
-        const d = doc.data();
-        sheetLembur.addRow([
-          k++,
-          d.nama,
-          d.jabatan,
-          d.shift || "-",
-          d.dilemburkan_oleh,
-          `${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}`,
-          d.approve ? "Approved" : "Pending",
-          d.reject ? "Rejected" : "-",
-          d.reason || "-",
-          d.approvedBy || "-",
-          d.approveDate || "-"
-        ]);
-      });
-
-      // ------------------- EXPORT FILE -------------------
-      const buffer = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buffer]), "Data_Shift.xlsx");
+    // Helper: buat ISO date "YYYY-MM-DD" dari berbagai sumber
+    function toISOFromParts(year, month, day) {
+      if (year == null || month == null || day == null) return null;
+      const y = String(year).padStart(4, "0");
+      const m = String(month).padStart(2, "0");
+      const d = String(day).padStart(2, "0");
+      return `${y}-${m}-${d}`;
     }
+
+    function isoDateFromValue(val) {
+      if (!val && val !== 0) return null;
+      // Firestore Timestamp has toDate()
+      if (typeof val === "object" && typeof val.toDate === "function") {
+        const dt = val.toDate();
+        if (!isNaN(dt)) return dt.toISOString().slice(0,10);
+        return null;
+      }
+      // Date object
+      if (val instanceof Date) {
+        if (!isNaN(val)) return val.toISOString().slice(0,10);
+        return null;
+      }
+      // String: try if already YYYY-MM-DD
+      if (typeof val === "string") {
+        // If format YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
+        // If contains T or other parseable formats
+        const parsed = new Date(val);
+        if (!isNaN(parsed)) return parsed.toISOString().slice(0,10);
+        return null;
+      }
+      // number (timestamp ms)
+      if (typeof val === "number") {
+        const dt = new Date(val);
+        if (!isNaN(dt)) return dt.toISOString().slice(0,10);
+      }
+      return null;
+    }
+
+    document.getElementById('downloadExcel').onclick = async function() {
+      try {
+        const start = document.getElementById('filterStart').value;
+        const end = document.getElementById('filterEnd').value;
+        if (!start || !end) {
+          alert("Masukkan tanggal mulai dan sampai.");
+          return;
+        }
+
+        // Normalize start/end (should be YYYY-MM-DD from input[type=date])
+        const startISO = start;
+        const endISO = end;
+
+        // ===== SHIFT DATA =====
+        const shiftData = [];
+        const shiftSnap = await getDocs(collection(db, "shiftData"));
+        shiftSnap.forEach(docSnap => {
+          const d = docSnap.data() || {};
+          // Try various possible date sources for shift:
+          let tanggalShiftISO = isoDateFromValue(d.tanggal_shift) || isoDateFromValue(d.tanggal) || toISOFromParts(d.tahun, d.bulan, d.tanggal);
+          if (!tanggalShiftISO) {
+            // If field tgl disimpan sebagai object like {date: '...'} or another naming, add logs
+            console.warn(`shiftData doc ${docSnap.id} tidak punya tanggal yang bisa diparse. Fields:`, {
+              tanggal_shift: d.tanggal_shift,
+              tanggal: d.tanggal,
+              tahun: d.tahun, bulan: d.bulan, tanggal_field: d.tanggal
+            });
+          }
+
+          if (d.approve && tanggalShiftISO && tanggalShiftISO >= startISO && tanggalShiftISO <= endISO) {
+            shiftData.push({
+              "Nama 1": d.nama1 || d.nama || "",
+              "Nama 2": d.nama2 || "",
+              "Jabatan 1": d.jabatan1 || d.jabatan || "",
+              "Jabatan 2": d.jabatan2 || "",
+              "Shift Dari 1": d.shift_dari1 || d.shift_dari || "",
+              "Shift Menjadi 1": d.shift_menjadi1 || d.shift_menjadi || "",
+              "Tukar Off 1": d.jadwal_off1 || d.tukar_off || "",
+              "Shift Dari 2": d.shift_dari2 || "",
+              "Shift Menjadi 2": d.shift_menjadi2 || "",
+              "Tukar Off 2": d.jadwal_off2 || "",
+              "Leader": d.leader || "",
+              "Tanggal Tukar Shift": tanggalShiftISO,
+              "Hari": d.hari || "",
+              "Tanggal": d.tanggal || "",
+              "Bulan": d.bulan || "",
+              "Tahun": d.tahun || "",
+              "Alasan": d.alasan || d.reason || "",
+              "User Approve": d.approvedBy || d.approver || "-"
+            });
+          }
+        });
+
+        // ===== LEMBUR DATA =====
+        const lemburData = [];
+        const lemburSnap = await getDocs(collection(db, "lemburData"));
+        lemburSnap.forEach(docSnap => {
+          const d = docSnap.data() || {};
+          // Check possible sources: combined fields or parts
+          let tanggalISO = isoDateFromValue(d.tanggal) || isoDateFromValue(d.tanggal_lembur) || toISOFromParts(d.tahun, d.bulan, d.tanggal);
+          if (!tanggalISO) {
+            console.warn(`lemburData doc ${docSnap.id} tidak punya tanggal yang bisa diparse. Fields:`, {
+              tanggal: d.tanggal,
+              tanggal_lembur: d.tanggal_lembur,
+              tahun: d.tahun, bulan: d.bulan, tanggal_field: d.tanggal
+            });
+          }
+
+          if (d.approve && tanggalISO && tanggalISO >= startISO && tanggalISO <= endISO) {
+            lemburData.push({
+              "Nama": d.nama || "",
+              "Jabatan": d.jabatan || "",
+              "Shift": d.shift || "",
+              "Dilemburkan Oleh": d.dilemburkan_oleh || d.dilemburkan_oleh || "",
+              "Tanggal": `${d.hari || ""}${d.hari ? ", " : ""}${d.tanggal || ""}${d.tanggal ? "-" : ""}${d.bulan || ""}${d.bulan ? "-" : ""}${d.tahun || ""}`.replace(/(^, |--|-$)/g, ""),
+              "TanggalISO": tanggalISO || "",
+              "User Approve": d.approvedBy || "-"
+            });
+          }
+        });
+
+        // ===== GANTI HARI DATA =====
+        const gantiHariData = [];
+        const gantiHariSnap = await getDocs(collection(db, "gantiHariData"));
+        gantiHariSnap.forEach(docSnap => {
+          const d = docSnap.data() || {};
+          // For ganti hari we usually filter by "tanggal_awal"
+          let tanggalAwalISO = isoDateFromValue(d.tanggal_awal) || toISOFromParts(d.tahun_awal, d.bulan_awal, d.tanggal_awal);
+          if (!tanggalAwalISO) {
+            console.warn(`gantiHariData doc ${docSnap.id} tidak punya tanggal_awal yang bisa diparse. Fields:`, {
+              tanggal_awal: d.tanggal_awal,
+              tahun_awal: d.tahun_awal, bulan_awal: d.bulan_awal, tanggal_awal_field: d.tanggal_awal
+            });
+          }
+
+          if (d.approve && tanggalAwalISO && tanggalAwalISO >= startISO && tanggalAwalISO <= endISO) {
+            gantiHariData.push({
+              "Nama": d.nama || "",
+              "Jabatan": d.jabatan || "",
+              "Alasan": d.dikarenakan || "",
+              "Tanggal Awal": `${d.hari_awal || ""}${d.hari_awal ? ", " : ""}${d.tanggal_awal || ""}${d.tanggal_awal ? "-" : ""}${d.bulan_awal || ""}${d.bulan_awal ? "-" : ""}${d.tahun_awal || ""}`.replace(/(^, |--|-$)/g, ""),
+              "Tanggal Ganti": `${d.hari_ganti || ""}${d.hari_ganti ? ", " : ""}${d.tanggal_ganti || ""}${d.tanggal_ganti ? "-" : ""}${d.bulan_ganti || ""}${d.bulan_ganti ? "-" : ""}${d.tahun_ganti || ""}`.replace(/(^, |--|-$)/g, ""),
+              "TanggalAwalISO": tanggalAwalISO || "",
+              "User Approve": d.approvedBy || "-"
+            });
+          }
+        });
+
+        console.log("Counts:", {
+          shiftCount: shiftData.length,
+          lemburCount: lemburData.length,
+          gantiHariCount: gantiHariData.length
+        });
+        if (shiftData.length) console.log("Contoh shiftData[0]:", shiftData[0]);
+        if (lemburData.length) console.log("Contoh lemburData[0]:", lemburData[0]);
+        if (gantiHariData.length) console.log("Contoh gantiHariData[0]:", gantiHariData[0]);
+
+        if (shiftData.length === 0 && lemburData.length === 0 && gantiHariData.length === 0) {
+          alert("Tidak ada data approved pada periode tersebut.");
+          return;
+        }
+
+        // ===== Generate Excel =====
+        const wb = XLSX.utils.book_new();
+
+        if (shiftData.length > 0) {
+          const ws1 = XLSX.utils.json_to_sheet(shiftData);
+          XLSX.utils.book_append_sheet(wb, ws1, "ShiftData");
+        }
+        if (lemburData.length > 0) {
+          const ws2 = XLSX.utils.json_to_sheet(lemburData);
+          XLSX.utils.book_append_sheet(wb, ws2, "LemburData");
+        }
+        if (gantiHariData.length > 0) {
+          const ws3 = XLSX.utils.json_to_sheet(gantiHariData);
+          XLSX.utils.book_append_sheet(wb, ws3, "GantiHariData");
+        }
+
+        XLSX.writeFile(wb, `approved_data_${startISO}_to_${endISO}.xlsx`);
+      } catch (err) {
+        console.error("Error saat proses download:", err);
+        alert("Terjadi error saat menyiapkan file. Cek console untuk detail.");
+      }
+    };
   </script>
 </body>
 </html>
-
