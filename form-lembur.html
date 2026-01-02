@@ -101,6 +101,16 @@
       </section>
     </main>
   </div>
+  
+  <!-- Mobile Menu Script -->
+  <script>
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.overlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+  </script>
 
   <!-- Firebase + app script -->
   <script type="module">
