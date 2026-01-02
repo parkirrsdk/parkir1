@@ -43,10 +43,23 @@
           <input type="text" name="nama" required>
 
           <label>JABATAN</label>
-          <input type="text" name="jabatan" required>
+          <select name="jabatan" required>
+            <option value="">-- Pilih Jabatan --</option>
+            <option value="Attenden">Attenden</option>
+            <option value="Admin">Admin</option>
+            <option value="Leader">Leader</option>
+            <option value="CPM">CPM</option>
+            <option value="Member">Member</option>
+			<option value="IT">IT</option>
+          </select>
 
           <label>SHIFT</label>
-          <input type="text" name="shift" required>
+          <select name="shift" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>           
+          </select>
 
           <label>HARI & TANGGAL</label>
           <input type="date" id="dateHelper" name="tanggal_lembur" required>

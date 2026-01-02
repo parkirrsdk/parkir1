@@ -2,27 +2,34 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form Tukar Shift / OFF</title>
   <link rel="stylesheet" href="style-form.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="form-layout">
+  <!-- Mobile Menu Toggle -->
+  <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
+  <div class="overlay" onclick="toggleMenu()"></div>
 
+  <div class="form-layout">
     <!-- SIDEBAR -->
-    <aside class="sidebar" aria-label="Sidebar navigasi">
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar navigasi">
       <div class="sidebar-top">
         <div class="brand">
-          <div class="logo">🔁</div>
+          <div class="logo">📋</div>
           <div class="brand-text">
             <div class="brand-title">Shift App</div>
             <div class="brand-sub">Panel Input</div>
           </div>
         </div>
         <nav class="sidebar-nav">
-          <a href="form.html" id="tukarshiftLink" class="sidebar-link">Form Tukar Shift/Off</a>
-          <a href="form-lembur.html" id="melemburkanLink" class="sidebar-link">Form Melemburkan</a>
-          <a href="form-ganti-hari.html" id="gantihariLink" class="sidebar-link">Form Pengantian Hari</a>
-          <a href="index.html" id="dashboardLink" class="sidebar-link">Dashboard</a>
+          <a href="form.html" class="sidebar-link">Form Tukar Shift/Off</a>
+          <a href="form-lembur.html" class="sidebar-link">Form Melemburkan</a>
+          <a href="form-ganti-hari.html" class="sidebar-link">Form Pengantian Hari</a>
+          <a href="index.html" class="sidebar-link">Dashboard</a>
         </nav>
       </div>
       <div class="sidebar-bottom">
@@ -42,27 +49,71 @@
         <form id="shiftForm" class="form-card">
           <h2>PIHAK 1</h2>
           <label>NAMA</label>
-          <input type="text" name="nama1" required>
+          <input type="text" name="nama1" placeholder="Masukkan nama lengkap" required>
+          
           <label>JABATAN</label>
-          <input type="text" name="jabatan1" required>
+          <select name="jabatan1" required>
+            <option value="">-- Pilih Jabatan --</option>
+            <option value="Attenden">Attenden</option>
+            <option value="Admin">Admin</option>
+            <option value="Leader">Leader</option>
+            <option value="CPM">CPM</option>
+            <option value="Member">Member</option>
+			<option value="IT">IT</option>
+          </select>
+          
           <label>SHIFT DARI</label>
-          <input type="text" name="shift_dari1" required>
+          <select name="shift_dari1" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>          
+          </select>
+          
           <label>SHIFT MENJADI</label>
-          <input type="text" name="shift_menjadi1" required>
+          <select name="shift_menjadi1" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>          
+          </select>
+          
           <label>JADWAL OFF</label>
-          <input type="text" name="jadwal_off1">
+          <input type="text" name="jadwal_off1" placeholder="Contoh Jum'at sabtu minggu">
 
           <h2>PIHAK 2</h2>
           <label>NAMA</label>
-          <input type="text" name="nama2" required>
+          <input type="text" name="nama2" placeholder="Masukkan nama lengkap" required>
+          
           <label>JABATAN</label>
-          <input type="text" name="jabatan2" required>
+          <select name="jabatan2" required>
+            <option value="">-- Pilih Jabatan --</option>
+            <option value="Attenden">Attenden</option>
+            <option value="Admin">Admin</option>
+            <option value="Leader">Leader</option>
+            <option value="CPM">CPM</option>
+            <option value="Member">Member</option>
+			<option value="IT">IT</option>
+          </select>
+          
           <label>SHIFT DARI</label>
-          <input type="text" name="shift_dari2" required>
+          <select name="shift_dari2" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>           
+          </select>
+          
           <label>SHIFT MENJADI</label>
-          <input type="text" name="shift_menjadi2" required>
+          <select name="shift_menjadi2" required>
+            <option value="">-- Pilih Shift --</option>
+            <option value="Shift 1">Shift 1</option>
+            <option value="Shift 2">Shift 2</option>
+            <option value="Shift 3">Shift 3</option>
+          </select>
+          
           <label>JADWAL OFF</label>
-          <input type="text" name="jadwal_off2">
+          <input type="text" name="jadwal_off2" placeholder="Contoh Jum'at sabtu minggu">
 
           <h2>Detail Lain</h2>
           <label>TANGGAL TUKAR SHIFT / OFF</label>
@@ -71,34 +122,45 @@
           <div class="grid-4">
             <div>
               <label>HARI</label>
-              <input type="text" id="hari" name="hari" required>
+              <input type="text" id="hari" name="hari" readonly required>
             </div>
             <div>
               <label>TANGGAL</label>
-              <input type="number" min="1" max="31" id="tanggal" name="tanggal" required>
+              <input type="number" min="1" max="31" id="tanggal" name="tanggal" readonly required>
             </div>
             <div>
               <label>BULAN</label>
-              <input type="number" min="1" max="12" id="bulan" name="bulan" required>
+              <input type="number" min="1" max="12" id="bulan" name="bulan" readonly required>
             </div>
             <div>
               <label>TAHUN</label>
-              <input type="number" min="2000" max="2100" id="tahun" name="tahun" required>
+              <input type="number" min="2000" max="2100" id="tahun" name="tahun" readonly required>
             </div>
           </div>
 
           <label>ALASAN</label>
-          <input type="text" name="alasan" required>
+          <input type="text" name="alasan" placeholder="Jelaskan alasan tukar shift" required>
+          
           <label>LEADER</label>
-          <input type="text" name="leader" required>
+          <input type="text" name="leader" placeholder="Nama Leader yang menyetujui" required>
 
           <div class="form-actions">
-            <button type="submit" class="btn-save">Simpan Data</button>
+            <button type="submit" class="btn-save">💾 Simpan Data</button>
           </div>
         </form>
       </section>
     </main>
   </div>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.overlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+  </script>
 
   <!-- Firebase + app script -->
   <script type="module">
@@ -142,22 +204,27 @@
     document.getElementById('shiftForm').onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
+      const submitBtn = form.querySelector('.btn-save');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Menyimpan...';
+      
       const obj = { approve: false };
       [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
 
       const col = collection(db, "shiftData");
-      // Validasi nama1-AND-tanggal maupun nama2-AND-tanggal
       const q1 = query(col, where("nama1", "==", obj.nama1), where("tanggal_shift", "==", obj.tanggal_shift));
       const q2 = query(col, where("nama2", "==", obj.nama2), where("tanggal_shift", "==", obj.tanggal_shift));
       const snap1 = await getDocs(q1);
       const snap2 = await getDocs(q2);
 
       if (!snap1.empty || !snap2.empty) {
-        document.getElementById('notif').innerText = "⚠️ Data sudah diinput sebelumnya mohon cek di list data tukar shif/off!";
+        document.getElementById('notif').innerText = "⚠️ Data sudah diinput sebelumnya mohon cek di list data tukar shift/off!";
         document.getElementById('notif').classList.remove('success');
         document.getElementById('notif').classList.add('error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Simpan Data';
         return;
       }
 
@@ -167,12 +234,18 @@
         document.getElementById('notif').classList.remove('error');
         document.getElementById('notif').classList.add('success');
         form.reset();
+        setTimeout(() => {
+          document.getElementById('notif').style.display = 'none';
+        }, 5000);
       } catch (err) {
         console.error(err);
         document.getElementById('notif').innerText = "❌ Gagal simpan data!";
         document.getElementById('notif').classList.remove('success');
         document.getElementById('notif').classList.add('error');
       }
+      
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Simpan Data';
     };
   </script>
 

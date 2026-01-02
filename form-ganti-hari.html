@@ -2,14 +2,21 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form Penggantian Hari</title>
   <link rel="stylesheet" href="style-form.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="form-layout">
+  <!-- Mobile Menu Toggle -->
+  <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
+  <div class="overlay" onclick="toggleMenu()"></div>
 
+  <div class="form-layout">
     <!-- SIDEBAR -->
-    <aside class="sidebar" aria-label="Sidebar navigasi">
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar navigasi">
       <div class="sidebar-top">
         <div class="brand">
           <div class="logo">📅</div>
@@ -19,10 +26,10 @@
           </div>
         </div>
         <nav class="sidebar-nav">
-          <a href="form.html" id="tukarshiftLink" class="sidebar-link">Form Tukar Shift/Off</a>
-          <a href="form-lembur.html" id="melemburkanLink" class="sidebar-link">Form Melemburkan</a>
-          <a href="form-ganti-hari.html" id="gantihariLink" class="sidebar-link">Form Pengantian Hari</a>
-          <a href="index.html" id="dashboardLink" class="sidebar-link">Dashboard</a>
+          <a href="form.html" class="sidebar-link">Form Tukar Shift/Off</a>
+          <a href="form-lembur.html" class="sidebar-link">Form Melemburkan</a>
+          <a href="form-ganti-hari.html" class="sidebar-link">Form Pengantian Hari</a>
+          <a href="index.html" class="sidebar-link">Dashboard</a>
         </nav>
       </div>
       <div class="sidebar-bottom">
@@ -41,65 +48,85 @@
       <section class="form-wrap">
         <form id="gantiHariForm" class="form-card">
           <label>NAMA</label>
-          <input type="text" name="nama" required>
+          <input type="text" name="nama" placeholder="Masukkan nama lengkap" required>
 
           <label>JABATAN</label>
-          <input type="text" name="jabatan" required>
+          <select name="jabatan" required>
+            <option value="">-- Pilih Jabatan --</option>
+            <option value="Attenden">Attenden</option>
+            <option value="Admin">Admin</option>
+            <option value="Leader">Leader</option>
+            <option value="CPM">CPM</option>
+            <option value="Member">Member</option>
+			<option value="IT">IT</option>
+          </select>
 
+          <h2>Hari yang Akan Diganti</h2>
           <label>HARI & TANGGAL</label>
           <input type="date" id="dateAwal" name="tanggal_awal" required>
 
           <div class="grid-4">
             <div>
               <label>HARI</label>
-              <input type="text" id="hariAwal" name="hari_awal" required>
+              <input type="text" id="hariAwal" name="hari_awal" readonly required>
             </div>
             <div>
               <label>TANGGAL</label>
-              <input type="number" min="1" max="31" id="tanggalAwal" name="tanggal_awal" required>
+              <input type="number" min="1" max="31" id="tanggalAwal" name="tanggal_awal" readonly required>
             </div>
             <div>
               <label>BULAN</label>
-              <input type="number" min="1" max="12" id="bulanAwal" name="bulan_awal" required>
+              <input type="number" min="1" max="12" id="bulanAwal" name="bulan_awal" readonly required>
             </div>
             <div>
               <label>TAHUN</label>
-              <input type="number" min="2000" max="2100" id="tahunAwal" name="tahun_awal" required>
+              <input type="number" min="2000" max="2100" id="tahunAwal" name="tahun_awal" readonly required>
             </div>
           </div>
 
-          <label>Alasan</label>
-          <input type="text" name="dikarenakan" required>
+          <label>ALASAN</label>
+          <input type="text" name="dikarenakan" placeholder="Jelaskan alasan penggantian hari" required>
 
+          <h2>Hari Pengganti</h2>
           <label>UNTUK MENGGANTIKAN HARI & TANGGAL</label>
           <input type="date" id="dateGanti" name="tanggal_ganti" required>
 
           <div class="grid-4">
             <div>
               <label>HARI</label>
-              <input type="text" id="hariGanti" name="hari_ganti" required>
+              <input type="text" id="hariGanti" name="hari_ganti" readonly required>
             </div>
             <div>
               <label>TANGGAL</label>
-              <input type="number" min="1" max="31" id="tanggalGanti" name="tanggal_ganti" required>
+              <input type="number" min="1" max="31" id="tanggalGanti" name="tanggal_ganti" readonly required>
             </div>
             <div>
               <label>BULAN</label>
-              <input type="number" min="1" max="12" id="bulanGanti" name="bulan_ganti" required>
+              <input type="number" min="1" max="12" id="bulanGanti" name="bulan_ganti" readonly required>
             </div>
             <div>
               <label>TAHUN</label>
-              <input type="number" min="2000" max="2100" id="tahunGanti" name="tahun_ganti" required>
+              <input type="number" min="2000" max="2100" id="tahunGanti" name="tahun_ganti" readonly required>
             </div>
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-save">Simpan Data</button>
+            <button type="submit" class="btn-save">💾 Simpan Data</button>
           </div>
         </form>
       </section>
     </main>
   </div>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    function toggleMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.querySelector('.overlay');
+      sidebar.classList.toggle('active');
+      overlay.classList.toggle('active');
+    }
+  </script>
 
   <!-- Firebase + app script -->
   <script type="module">
@@ -132,7 +159,6 @@
     }
     window.logout = logout;
 
-    // role access tanpa approveLink
     const role = currentUser.role;
     if (role === "Leader") {
       if(document.getElementById("dataLink")) document.getElementById("dataLink").style.display = "none";
@@ -146,19 +172,24 @@
     document.getElementById("gantiHariForm").onsubmit = async function(e) {
       e.preventDefault();
       const form = e.target;
+      const submitBtn = form.querySelector('.btn-save');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Menyimpan...';
+      
       const obj = { approve: false };
       [...form.elements].forEach(el => { if (el.name) obj[el.name] = el.value; });
       obj.createdBy = currentUser.username;
       obj.createdAt = new Date();
 
       const col = collection(db, "gantiHariData");
-      // Validasi nama & tanggal_awal
       const q = query(col, where("nama", "==", obj.nama), where("tanggal_awal", "==", obj.tanggal_awal));
       const snap = await getDocs(q);
 
       if (!snap.empty) {
         document.getElementById("notif").innerText = "⚠️ Data sudah diinput sebelumnya mohon di cek di list data ganti hari!";
         document.getElementById("notif").className = "notif-area error";
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Simpan Data';
         return;
       }
 
@@ -167,11 +198,17 @@
         document.getElementById("notif").innerText = "✅ Data penggantian hari berhasil disimpan!";
         document.getElementById("notif").className = "notif-area success";
         form.reset();
+        setTimeout(() => {
+          document.getElementById('notif').style.display = 'none';
+        }, 5000);
       } catch (err) {
         console.error(err);
         document.getElementById("notif").innerText = "❌ Gagal simpan data penggantian hari!";
         document.getElementById("notif").className = "notif-area error";
       }
+      
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Simpan Data';
     };
   </script>
 
