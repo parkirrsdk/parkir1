@@ -11,12 +11,12 @@
 </head>
 <body>
  <!-- Mobile Menu Toggle -->
-  <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu">☰</button>
+  <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Menu" aria-expanded="false">☰</button>
   <div class="overlay" onclick="toggleMenu()"></div>
   
   <div class="form-layout">
     <!-- SIDEBAR -->
-    <aside class="sidebar" aria-label="Sidebar navigasi">
+    <aside id="sidebar" class="sidebar" aria-label="Sidebar navigasi">
       <div class="sidebar-top">
         <div class="brand">
           <div class="logo">⏱️</div>
@@ -105,10 +105,13 @@
   <!-- Mobile Menu Script -->
   <script>
     function toggleMenu() {
-      const sidebar = document.getElementById('sidebar');
+      const sidebar = document.getElementById('sidebar') || document.querySelector('.sidebar');
       const overlay = document.querySelector('.overlay');
+      if (!sidebar || !overlay) return;
       sidebar.classList.toggle('active');
       overlay.classList.toggle('active');
+      const menuBtn = document.querySelector('.menu-toggle');
+      if (menuBtn) menuBtn.setAttribute('aria-expanded', String(sidebar.classList.contains('active')));
     }
   </script>
 
