@@ -9,14 +9,16 @@
   <div class="container">
     <h1>List Data Melemburkan</h1>
 
-    <input type="text" id="searchInput" placeholder="Cari data..." onkeyup="filterTable()" style="margin-bottom:10px; padding:5px; width:250px;">
-    <select id="filterApprove" onchange="filterTable()" style="margin-left:10px; padding:5px;">
+    <div class="filter-section">
+    <input type="text" id="searchInput" placeholder="🔍 Cari data..." onkeyup="filterTable()">
+    <select id="filterApprove" onchange="filterTable()">
       <option value="">Semua Status</option>
       <option value="Approved">Approved</option>
       <option value="Pending">Pending</option>
       <option value="Rejected">Rejected</option>
     </select>
     <input type="date" id="filterTanggal" onchange="filterTable()" style="margin-left:10px; padding:5px;">
+	</div>
 
     <button id="deleteSelected" style="margin:10px 0; display:none;" onclick="deleteSelectedRows()">Delete Selected</button>
     <div class="table-responsive">
