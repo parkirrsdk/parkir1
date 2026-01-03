@@ -2,29 +2,59 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Login Shift App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Shift App</title>
   <link rel="stylesheet" href="style-login.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="login-body">
   <div class="login-container">
     <div class="login-card">
-	<center>
+      <!-- Logo/Icon -->
+      <div class="login-logo">🔐</div>
+      
       <h1 class="login-title">Shift App</h1>
-	  </center>
+      <p class="login-subtitle">Silakan login untuk melanjutkan</p>
+      
       <form id="loginForm" class="login-form">
-        <input type="text" id="username" placeholder="Username" required>
+        <div>
+          <input 
+            type="text" 
+            id="username" 
+            placeholder="Username" 
+            autocomplete="username"
+            required
+          >
+        </div>
 
         <div class="pw-row">
-          <input type="password" id="password" placeholder="Password" required>
-          <button type="button" id="toggleEye" class="eye-btn" aria-label="Tampilkan password">👁️</button>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Password"
+            autocomplete="current-password" 
+            required
+          >
+          <button 
+            type="button" 
+            id="toggleEye" 
+            class="eye-btn" 
+            aria-label="Tampilkan password"
+          >
+            👁️
+          </button>
         </div>
 
         <label class="show-pw">
-          <input type="checkbox" id="showPassword"> Tampilkan password
+          <input type="checkbox" id="showPassword"> 
+          <span>Tampilkan password</span>
         </label>
 
-        <button type="submit" class="btn-login">Login</button>
+        <button type="submit" class="btn-login">Masuk</button>
       </form>
+      
       <div id="notif"></div>
     </div>
   </div>
@@ -45,26 +75,27 @@
     const passwordInput = document.getElementById("password");
     const showCheckbox = document.getElementById("showPassword");
     const toggleEye = document.getElementById("toggleEye");
+    const notif = document.getElementById("notif");
 
+    // Update eye button state
     function updateEyeState(isText) {
-      // toggle visual icons by class
       if (isText) {
-        toggleEye.classList.add('visible');
+        toggleEye.textContent = '🙈';
         toggleEye.setAttribute('aria-label', 'Sembunyikan password');
       } else {
-        toggleEye.classList.remove('visible');
+        toggleEye.textContent = '👁️';
         toggleEye.setAttribute('aria-label', 'Tampilkan password');
       }
     }
 
-    // Checkbox toggles
+    // Checkbox toggle
     showCheckbox.addEventListener('change', () => {
       const makeText = showCheckbox.checked;
       passwordInput.type = makeText ? 'text' : 'password';
       updateEyeState(makeText);
     });
 
-    // Eye button toggles and keeps checkbox in sync
+    // Eye button toggle
     toggleEye.addEventListener('click', () => {
       const isText = passwordInput.type === 'text';
       passwordInput.type = isText ? 'password' : 'text';
@@ -72,21 +103,54 @@
       updateEyeState(!isText);
     });
 
+    // Form submission
     loginForm.onsubmit = function(e) {
       e.preventDefault();
+      
+      const submitBtn = loginForm.querySelector('.btn-login');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Memproses...';
+      submitBtn.classList.add('loading');
+      
       const u = document.getElementById("username").value.trim();
       const p = passwordInput.value.trim();
 
-      const found = users.find(x => x.username === u && x.password === p);
-      if (found) {
-        localStorage.setItem("currentUser", JSON.stringify(found));
-        window.location.href = "index.html";
-      } else {
-        const notif = document.getElementById("notif");
-        notif.innerText = "❌ Username atau password salah!";
-        notif.classList.add("error-text");
-      }
+      // Simulate loading delay
+      setTimeout(() => {
+        const found = users.find(x => x.username === u && x.password === p);
+        
+        if (found) {
+          localStorage.setItem("currentUser", JSON.stringify(found));
+          notif.innerText = "✅ Login berhasil! Mengalihkan...";
+          notif.className = "success-text";
+          
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 800);
+        } else {
+          notif.innerText = "❌ Username atau password salah!";
+          notif.className = "error-text";
+          
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Masuk';
+          submitBtn.classList.remove('loading');
+          
+          // Auto hide error after 5 seconds
+          setTimeout(() => {
+            notif.style.display = 'none';
+          }, 5000);
+        }
+      }, 600);
     };
+
+    // Clear notification when user types
+    document.getElementById("username").addEventListener('input', () => {
+      notif.style.display = 'none';
+    });
+    
+    passwordInput.addEventListener('input', () => {
+      notif.style.display = 'none';
+    });
   </script>
 </body>
 </html>

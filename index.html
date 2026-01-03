@@ -2,86 +2,214 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard Shift App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Shift App</title>
   <link rel="stylesheet" href="style-index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="dashboard-container">
-    <h1 class="fade-in">Dashboard Shift App</h1>
-    <p id="welcome" class="slide-down"></p>
-    <button onclick="logout()" class="btn-logout">Logout</button>
+    <!-- Header Section -->
+    <div class="dashboard-header">
+      <div>
+        <h1 class="fade-in">Dashboard Shift App</h1>
+        <p id="welcome" class="slide-down"></p>
+        <span id="userBadge" class="user-badge"></span>
+      </div>
+      <button onclick="logout()" class="btn-logout">🚪 Logout</button>
+    </div>
+
     <hr>
-    <div id="menu" class="menu-grid fade-in"></div>
+
+    <!-- Menu Sections -->
+    <div id="menuContainer"></div>
   </div>
 
   <script>
+    // Check if user is logged in
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
     if (!currentUser) {
-      window.location.href = "login.html"; // redirect kalau belum login
-    }
-
-    document.getElementById("welcome").innerText = 
-      `Selamat datang, ${currentUser.username} [${currentUser.role}]`;
-
-    function logout() {
-      localStorage.removeItem("currentUser");
       window.location.href = "login.html";
     }
 
-    // Tampilkan menu sesuai role
+    // Display welcome message
+    document.getElementById("welcome").innerText = 
+      `Selamat datang, ${currentUser.username}!`;
+    
+    document.getElementById("userBadge").innerText = 
+      `👤 ${currentUser.role}`;
+
+    // Logout function
+    function logout() {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      }
+    }
+
+    // Menu configuration based on role with categories
     const role = currentUser.role;
-    const menu = document.getElementById("menu");
+    const menuContainer = document.getElementById("menuContainer");
 
-    if (role === "IT" || role === "CPM" || role === "Superuser") {
-      menu.innerHTML = `
-        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
-		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
-		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
-        <a href="list-approve.html" class="menu-card">✅ List Approve Tukar Shift/Off</a>
-		<a href="list-approve-lembur.html" class="menu-card">✅ List Approve Melemburkan</a>
-		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
-        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
-		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
-		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
-        <a href="download.html" class="menu-card">⬇️ Download Excel</a>
-      `;
-    }
+    const menuCategories = {
+      IT: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        approve: [
+          { icon: '✅', text: 'Approve Tukar Shift/Off', link: 'list-approve.html' },
+          { icon: '✅', text: 'Approve Melemburkan', link: 'list-approve-lembur.html' },
+          { icon: '✅', text: 'Approve Ganti Hari/Off', link: 'list-approve-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ],
+        download: [
+          { icon: '⬇️', text: 'Download Excel', link: 'download.html' }
+        ]
+      },
+      CPM: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        approve: [
+          { icon: '✅', text: 'Approve Tukar Shift/Off', link: 'list-approve.html' },
+          { icon: '✅', text: 'Approve Melemburkan', link: 'list-approve-lembur.html' },
+          { icon: '✅', text: 'Approve Ganti Hari/Off', link: 'list-approve-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ],
+        download: [
+          { icon: '⬇️', text: 'Download Excel', link: 'download.html' }
+        ]
+      },
+      Superuser: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        approve: [
+          { icon: '✅', text: 'Approve Tukar Shift/Off', link: 'list-approve.html' },
+          { icon: '✅', text: 'Approve Melemburkan', link: 'list-approve-lembur.html' },
+          { icon: '✅', text: 'Approve Ganti Hari/Off', link: 'list-approve-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ],
+        download: [
+          { icon: '⬇️', text: 'Download Excel', link: 'download.html' }
+        ]
+      },
+      Admin: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        approve: [
+          { icon: '✅', text: 'Approve Ganti Hari/Off', link: 'list-approve-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ],
+        download: [
+          { icon: '⬇️', text: 'Download Excel', link: 'download.html' }
+        ]
+      },
+      Leader: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        approve: [
+          { icon: '✅', text: 'Approve Tukar Shift/Off', link: 'list-approve.html' },
+          { icon: '✅', text: 'Approve Melemburkan', link: 'list-approve-lembur.html' },
+          { icon: '✅', text: 'Approve Ganti Hari/Off', link: 'list-approve-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ]
+      },
+      Attendance: {
+        input: [
+          { icon: '📝', text: 'Form Tukar Shift/Off', link: 'form.html' },
+          { icon: '⏱️', text: 'Form Lembur', link: 'form-lembur.html' },
+          { icon: '📅', text: 'Form Ganti Hari', link: 'form-ganti-hari.html' }
+        ],
+        data: [
+          { icon: '📊', text: 'Data Tukar Shift/Off', link: 'list-data.html' },
+          { icon: '📊', text: 'Data Ganti Hari', link: 'list-data-ganti-hari.html' },
+          { icon: '📊', text: 'Data Melemburkan', link: 'list-data-lembur.html' }
+        ]
+      }
+    };
 
-    if (role === "Admin") {
-      menu.innerHTML = `
-        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
-		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
-		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
-        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
-		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
-		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
-		<a href="download.html" class="menu-card">⬇️ Download Excel</a>
-		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
-      `;
-    }
+    // Category labels
+    const categoryLabels = {
+      input: '📝 Input Form',
+      approve: '✅ Persetujuan',
+      data: '📊 Data & Laporan',
+      download: '⬇️ Unduh'
+    };
 
-    if (role === "Leader") {
-      menu.innerHTML = `
-        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
-		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
-		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
-        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
-		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
-		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
-        <a href="list-approve.html" class="menu-card">✅ List Approve Tukar Shift/Off</a>
-		<a href="list-approve-lembur.html" class="menu-card">✅ List Approve Melemburkan</a>
-		<a href="list-approve-ganti-hari.html" class="menu-card">✅ List Approve Ganti Hari /Off</a>
-      `;
-    }
+    // Render menu based on role with categories
+    const userMenuCategories = menuCategories[role] || {};
+    
+    if (Object.keys(userMenuCategories).length > 0) {
+      let htmlContent = '';
+      let animationDelay = 0;
 
-    if (role === "Attendance") {
-      menu.innerHTML = `
-        <a href="form.html" class="menu-card">📝 Input Form Tukar Shift/Off</a>
-		<a href="form-lembur.html" class="menu-card">📝 Input Form Lembur</a>
-		<a href="form-ganti-hari.html" class="menu-card">📝 Input Form Ganti Hari</a>
-        <a href="list-data.html" class="menu-card">📊 List Data Tukar Shif/Off</a>
-		<a href="list-data-ganti-hari.html" class="menu-card">📊 List Data Ganti hari</a>
-		<a href="list-data-lembur.html" class="menu-card">📊 List Data Melemburkan</a>
+      Object.entries(userMenuCategories).forEach(([category, items]) => {
+        if (items && items.length > 0) {
+          htmlContent += `
+            <div class="menu-section fade-in" style="animation-delay: ${animationDelay}s">
+              <h2 class="section-title">${categoryLabels[category]}</h2>
+              <div class="menu-grid">
+                ${items.map((item, index) => `
+                  <a href="${item.link}" class="menu-card" style="animation-delay: ${animationDelay + 0.1 + (index * 0.05)}s">
+                    <span class="menu-icon">${item.icon}</span>
+                    <span class="menu-text">${item.text}</span>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          animationDelay += 0.2;
+        }
+      });
+
+      menuContainer.innerHTML = htmlContent;
+
+      // Add fade-in animation class to menu cards
+      document.querySelectorAll('.menu-card').forEach(card => {
+        card.classList.add('fade-in');
+      });
+    } else {
+      menuContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">🔒</div>
+          <h3>Tidak Ada Menu</h3>
+          <p>Role Anda belum memiliki akses menu.</p>
+        </div>
       `;
     }
   </script>
