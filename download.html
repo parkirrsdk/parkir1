@@ -2,25 +2,358 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Download Excel Approve</title>
-  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding: 20px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      max-width: 600px;
+      width: 100%;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      color: #374151;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label::before {
+      content: '📅';
+      font-size: 18px;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      background: #f9fafb;
+    }
+
+    input[type="date"]:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .button-group {
+      margin-top: 32px;
+    }
+
+    #downloadExcel {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #downloadExcel::before {
+      content: '⬇️';
+      font-size: 20px;
+    }
+
+    #downloadExcel:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    #downloadExcel:active {
+      transform: translateY(-1px);
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+      margin: 32px 0;
+    }
+
+    .nav-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .nav-links a {
+      background: #f3f4f6;
+      padding: 12px 16px;
+      border-radius: 10px;
+      color: #667eea;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      font-size: 14px;
+    }
+
+    .nav-links a:hover {
+      background: #e0f2fe;
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .info-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #92400e;
+    }
+
+    .info-box::before {
+      content: '💡 ';
+      font-size: 16px;
+    }
+
+    .date-preview {
+      background: #f9fafb;
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #6b7280;
+      display: none;
+    }
+
+    .date-preview.active {
+      display: block;
+    }
+
+    .date-preview strong {
+      color: #374151;
+      font-size: 15px;
+    }
+
+    /* Loading State */
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 24px 20px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        font-size: 13px;
+        margin-bottom: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      input[type="date"] {
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      #downloadExcel {
+        padding: 14px 20px;
+        font-size: 15px;
+      }
+
+      .nav-links {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links a {
+        padding: 12px;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+
+      .info-box {
+        font-size: 12px;
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>Download Data Approved</h1>
-    <label>Tanggal Mulai:
-      <input type="date" id="filterStart">
-    </label>
-    <label>Tanggal Sampai:
-      <input type="date" id="filterEnd">
-    </label>
-    <button id="downloadExcel">Download Excel</button>
-    <br><br>
-    <a href="form.html">Input Data</a> |
-    <a href="list-approve.html">List Approve</a> |
-    <a href="list-data.html">List Data</a>
+    <h1>📊 Download Data Approved</h1>
+    <p class="subtitle">Download data yang sudah di-approve dalam format Excel</p>
+
+    <div class="info-box">
+      <strong>Info:</strong> Pilih rentang tanggal untuk mendownload data yang sudah disetujui dari semua kategori (Shift, Lembur, dan Ganti Hari).
+    </div>
+
+    <div class="form-group">
+      <label for="filterStart">Tanggal Mulai</label>
+      <input type="date" id="filterStart" required>
+    </div>
+
+    <div class="form-group">
+      <label for="filterEnd">Tanggal Sampai</label>
+      <input type="date" id="filterEnd" required>
+    </div>
+
+    <div class="date-preview" id="datePreview">
+      Periode: <strong id="previewText">-</strong>
+    </div>
+
+    <div class="button-group">
+      <button id="downloadExcel">Download Excel</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="nav-links">
+      <a href="index.html">🏠 Dashboard</a>
+      <a href="list-approve.html">✅ List Approve</a>
+      <a href="list-data.html">📋 List Data</a>
+      <a href="#" onclick="logout(); return false;">🚪 Logout</a>
+    </div>
   </div>
+
+  <div class="loading" id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("currentUser");
+      alert("Anda berhasil logout!");
+      window.location.href = "login.html";
+    }
+
+    // Date preview
+    const startInput = document.getElementById('filterStart');
+    const endInput = document.getElementById('filterEnd');
+    const datePreview = document.getElementById('datePreview');
+    const previewText = document.getElementById('previewText');
+
+    function updatePreview() {
+      const start = startInput.value;
+      const end = endInput.value;
+      if (start && end) {
+        datePreview.classList.add('active');
+        previewText.textContent = `${start} sampai ${end}`;
+      } else {
+        datePreview.classList.remove('active');
+      }
+    }
+
+    startInput.addEventListener('change', updatePreview);
+    endInput.addEventListener('change', updatePreview);
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -48,27 +381,21 @@
 
     function isoDateFromValue(val) {
       if (!val && val !== 0) return null;
-      // Firestore Timestamp has toDate()
       if (typeof val === "object" && typeof val.toDate === "function") {
         const dt = val.toDate();
         if (!isNaN(dt)) return dt.toISOString().slice(0,10);
         return null;
       }
-      // Date object
       if (val instanceof Date) {
         if (!isNaN(val)) return val.toISOString().slice(0,10);
         return null;
       }
-      // String: try if already YYYY-MM-DD
       if (typeof val === "string") {
-        // If format YYYY-MM-DD
         if (/^\d{4}-\d{2}-\d{2}$/.test(val)) return val;
-        // If contains T or other parseable formats
         const parsed = new Date(val);
         if (!isNaN(parsed)) return parsed.toISOString().slice(0,10);
         return null;
       }
-      // number (timestamp ms)
       if (typeof val === "number") {
         const dt = new Date(val);
         if (!isNaN(dt)) return dt.toISOString().slice(0,10);
@@ -77,15 +404,18 @@
     }
 
     document.getElementById('downloadExcel').onclick = async function() {
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      
       try {
         const start = document.getElementById('filterStart').value;
         const end = document.getElementById('filterEnd').value;
         if (!start || !end) {
-          alert("Masukkan tanggal mulai dan sampai.");
+          alert("❌ Masukkan tanggal mulai dan sampai.");
           return;
         }
 
-        // Normalize start/end (should be YYYY-MM-DD from input[type=date])
+        loadingOverlay.classList.add('active');
+
         const startISO = start;
         const endISO = end;
 
@@ -94,15 +424,9 @@
         const shiftSnap = await getDocs(collection(db, "shiftData"));
         shiftSnap.forEach(docSnap => {
           const d = docSnap.data() || {};
-          // Try various possible date sources for shift:
           let tanggalShiftISO = isoDateFromValue(d.tanggal_shift) || isoDateFromValue(d.tanggal) || toISOFromParts(d.tahun, d.bulan, d.tanggal);
           if (!tanggalShiftISO) {
-            // If field tgl disimpan sebagai object like {date: '...'} or another naming, add logs
-            console.warn(`shiftData doc ${docSnap.id} tidak punya tanggal yang bisa diparse. Fields:`, {
-              tanggal_shift: d.tanggal_shift,
-              tanggal: d.tanggal,
-              tahun: d.tahun, bulan: d.bulan, tanggal_field: d.tanggal
-            });
+            console.warn(`shiftData doc ${docSnap.id} tidak punya tanggal yang bisa diparse.`);
           }
 
           if (d.approve && tanggalShiftISO && tanggalShiftISO >= startISO && tanggalShiftISO <= endISO) {
@@ -134,14 +458,9 @@
         const lemburSnap = await getDocs(collection(db, "lemburData"));
         lemburSnap.forEach(docSnap => {
           const d = docSnap.data() || {};
-          // Check possible sources: combined fields or parts
           let tanggalISO = isoDateFromValue(d.tanggal) || isoDateFromValue(d.tanggal_lembur) || toISOFromParts(d.tahun, d.bulan, d.tanggal);
           if (!tanggalISO) {
-            console.warn(`lemburData doc ${docSnap.id} tidak punya tanggal yang bisa diparse. Fields:`, {
-              tanggal: d.tanggal,
-              tanggal_lembur: d.tanggal_lembur,
-              tahun: d.tahun, bulan: d.bulan, tanggal_field: d.tanggal
-            });
+            console.warn(`lemburData doc ${docSnap.id} tidak punya tanggal yang bisa diparse.`);
           }
 
           if (d.approve && tanggalISO && tanggalISO >= startISO && tanggalISO <= endISO) {
@@ -149,7 +468,7 @@
               "Nama": d.nama || "",
               "Jabatan": d.jabatan || "",
               "Shift": d.shift || "",
-              "Dilemburkan Oleh": d.dilemburkan_oleh || d.dilemburkan_oleh || "",
+              "Dilemburkan Oleh": d.dilemburkan_oleh || "",
               "Tanggal": `${d.hari || ""}${d.hari ? ", " : ""}${d.tanggal || ""}${d.tanggal ? "-" : ""}${d.bulan || ""}${d.bulan ? "-" : ""}${d.tahun || ""}`.replace(/(^, |--|-$)/g, ""),
               "TanggalISO": tanggalISO || "",
               "User Approve": d.approvedBy || "-"
@@ -162,13 +481,9 @@
         const gantiHariSnap = await getDocs(collection(db, "gantiHariData"));
         gantiHariSnap.forEach(docSnap => {
           const d = docSnap.data() || {};
-          // For ganti hari we usually filter by "tanggal_awal"
           let tanggalAwalISO = isoDateFromValue(d.tanggal_awal) || toISOFromParts(d.tahun_awal, d.bulan_awal, d.tanggal_awal);
           if (!tanggalAwalISO) {
-            console.warn(`gantiHariData doc ${docSnap.id} tidak punya tanggal_awal yang bisa diparse. Fields:`, {
-              tanggal_awal: d.tanggal_awal,
-              tahun_awal: d.tahun_awal, bulan_awal: d.bulan_awal, tanggal_awal_field: d.tanggal_awal
-            });
+            console.warn(`gantiHariData doc ${docSnap.id} tidak punya tanggal_awal yang bisa diparse.`);
           }
 
           if (d.approve && tanggalAwalISO && tanggalAwalISO >= startISO && tanggalAwalISO <= endISO) {
@@ -189,12 +504,10 @@
           lemburCount: lemburData.length,
           gantiHariCount: gantiHariData.length
         });
-        if (shiftData.length) console.log("Contoh shiftData[0]:", shiftData[0]);
-        if (lemburData.length) console.log("Contoh lemburData[0]:", lemburData[0]);
-        if (gantiHariData.length) console.log("Contoh gantiHariData[0]:", gantiHariData[0]);
 
         if (shiftData.length === 0 && lemburData.length === 0 && gantiHariData.length === 0) {
-          alert("Tidak ada data approved pada periode tersebut.");
+          loadingOverlay.classList.remove('active');
+          alert("❌ Tidak ada data approved pada periode tersebut.");
           return;
         }
 
@@ -215,9 +528,14 @@
         }
 
         XLSX.writeFile(wb, `approved_data_${startISO}_to_${endISO}.xlsx`);
+        
+        loadingOverlay.classList.remove('active');
+        alert("✅ File Excel berhasil didownload!");
+        
       } catch (err) {
         console.error("Error saat proses download:", err);
-        alert("Terjadi error saat menyiapkan file. Cek console untuk detail.");
+        loadingOverlay.classList.remove('active');
+        alert("❌ Terjadi error saat menyiapkan file. Cek console untuk detail.");
       }
     };
   </script>
