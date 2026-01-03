@@ -2,14 +2,20 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>List Approve Melemburkan</title>
   <link rel="stylesheet" href="style-listApprove.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <h1>List Approve Melemburkan</h1>
+    <h1>⏱️ List Approve Melemburkan</h1>
     
-<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="searchTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" placeholder="Cari nama, jabatan, atau tanggal..." onkeyup="searchTable()">
+    </div>
 
     <div class="table-responsive">
       <table id="approveTable" class="styled-table">
@@ -20,33 +26,53 @@
             <th>Jabatan</th>
             <th>Shift</th>
             <th>Dilemburkan Oleh</th>
-            <th>Tanggal Melemburkan</th>
+            <th>Tanggal</th>
             <th>User Approve</th>
-            <th>Tanggal Approve</th>
-            <th>Approve</th>
-            <th>Reject</th>
-            <th>Delete</th>
+            <th>Tgl Approve</th>
+            <th>Aksi</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr class="loading">
+            <td colspan="9">Memuat data...</td>
+          </tr>
+        </tbody>
       </table>
     </div>
+
     <div class="nav-links">
-      <a href="download.html">Download Excel</a>
-	  <a href="index.html">Dashboard</a>
-    
-  <a href="#" onclick="logout()">Logout</a>
-</div>
-
-<script>
-  function logout() {
-    localStorage.removeItem("currentUser");
-    alert("Anda berhasil logout!");
-    window.location.href = "login.html";
-  }
-</script>
-
+      <a href="index.html">🏠 Dashboard</a>
+      <a href="download.html">⬇️ Download Excel</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
   </div>
+
+  <script>
+    function logout() {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      }
+    }
+
+    function searchTable() {
+      let input = document.getElementById("searchInput").value.toLowerCase();
+      let table = document.querySelector("table");
+      let trs = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < trs.length; i++) {
+        let tds = trs[i].getElementsByTagName("td");
+        let show = false;
+        for (let j = 0; j < tds.length; j++) {
+          if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
+            show = true;
+            break;
+          }
+        }
+        trs[i].style.display = show ? "" : "none";
+      }
+    }
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -64,84 +90,124 @@
     const db = getFirestore(app);
 
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    const role = currentUser ? currentUser.role : "";
+    if (!currentUser) {
+      window.location.href = "login.html";
+    }
+
+    const role = currentUser.role;
 
     async function renderTable() {
       const tbody = document.querySelector('#approveTable tbody');
       tbody.innerHTML = '';
 
-      const snapshot = await getDocs(collection(db, "lemburData"));
-      let i = 1;
-      snapshot.forEach(docSnap => {
-        const d = docSnap.data();
-        if (!d.approve && !d.reject) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i++}</td>
-            <td>${d.nama}</td>
-            <td>${d.jabatan}</td>
-            <td>${d.shift || ""}</td>
-            <td>${d.dilemburkan_oleh}</td>
-            <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
-            <td>${d.approvedBy || "-"}</td>
-            <td>${d.approveDate || "-"}</td>
-            <td><button class="btn-approve" onclick="approveData('${docSnap.id}')">Approve</button></td>
-            <td><button class="btn-reject" onclick="rejectData('${docSnap.id}')">Reject</button></td>
-            <td>${role === "Superuser" ? `<button class="btn-delete" onclick="deleteData('${docSnap.id}')">Delete</button>` : ""}</td>
+      try {
+        const snapshot = await getDocs(collection(db, "lemburData"));
+        let i = 1;
+        let hasData = false;
+
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          if (!d.approve && !d.reject) {
+            hasData = true;
+            const tr = document.createElement('tr');
+            
+            const actionButtons = `
+              <button class="btn-approve" onclick="approveData('${docSnap.id}')">✅ Approve</button>
+              <button class="btn-reject" onclick="rejectData('${docSnap.id}')">❌ Reject</button>
+              ${role === "Superuser" ? `<button class="btn-delete" onclick="deleteData('${docSnap.id}')">🗑️ Delete</button>` : ""}
+            `;
+
+            tr.innerHTML = `
+              <td>${i++}</td>
+              <td><strong>${d.nama || "-"}</strong></td>
+              <td>${d.jabatan || "-"}</td>
+              <td>${d.shift || "-"}</td>
+              <td>${d.dilemburkan_oleh || "-"}</td>
+              <td>${d.hari || ""}, ${d.tanggal || ""}-${d.bulan || ""}-${d.tahun || ""}</td>
+              <td>${d.approvedBy || "-"}</td>
+              <td>${d.approveDate || "-"}</td>
+              <td style="white-space: nowrap;">${actionButtons}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        });
+
+        if (!hasData) {
+          tbody.innerHTML = `
+            <tr class="empty-state">
+              <td colspan="9">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak Ada Data</h3>
+                <p>Belum ada data yang perlu di-approve</p>
+              </td>
+            </tr>
           `;
-          tbody.appendChild(tr);
         }
-      });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" style="color: red; text-align: center;">
+              ❌ Gagal memuat data. Silakan refresh halaman.
+            </td>
+          </tr>
+        `;
+      }
     }
 
     window.approveData = async function(id) {
-      await updateDoc(doc(db, "lemburData", id), { 
-        approve: true, 
-        approvedBy: currentUser.username,
-        approveDate: new Date().toLocaleString("id-ID")
-      });
-      alert("Data telah di-approve!");
-      renderTable();
+      if (!confirm('Apakah Anda yakin ingin approve data ini?')) return;
+
+      try {
+        await updateDoc(doc(db, "lemburData", id), { 
+          approve: true, 
+          approvedBy: currentUser.username,
+          approveDate: new Date().toLocaleString("id-ID")
+        });
+        alert("✅ Data berhasil di-approve!");
+        renderTable();
+      } catch (error) {
+        console.error("Error approving data:", error);
+        alert("❌ Gagal approve data!");
+      }
     };
 
     window.rejectData = async function(id) {
       const reason = prompt("Masukkan alasan reject:");
-      if (!reason) return;
-      await updateDoc(doc(db, "lemburData", id), { reject: true, reason });
-      alert("Data telah di-reject!");
-      renderTable();
+      if (!reason || reason.trim() === "") {
+        alert("Alasan reject harus diisi!");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "lemburData", id), { 
+          reject: true, 
+          reason: reason.trim(),
+          rejectedBy: currentUser.username,
+          rejectDate: new Date().toLocaleString("id-ID")
+        });
+        alert("✅ Data berhasil di-reject!");
+        renderTable();
+      } catch (error) {
+        console.error("Error rejecting data:", error);
+        alert("❌ Gagal reject data!");
+      }
     };
 
     window.deleteData = async function(id) {
-      if (confirm("Yakin ingin menghapus data ini?")) {
+      if (!confirm("⚠️ Yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!")) return;
+
+      try {
         await deleteDoc(doc(db, "lemburData", id));
-        alert("Data telah dihapus!");
+        alert("✅ Data berhasil dihapus!");
         renderTable();
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        alert("❌ Gagal menghapus data!");
       }
     };
 
     renderTable();
   </script>
-
-<script>
-  function searchTable() {
-    let input = document.getElementById("searchInput").value.toLowerCase();
-    let table = document.querySelector("table");
-    let trs = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < trs.length; i++) { // skip header row
-      let tds = trs[i].getElementsByTagName("td");
-      let show = false;
-      for (let j = 0; j < tds.length; j++) {
-        if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
-          show = true;
-          break;
-        }
-      }
-      trs[i].style.display = show ? "" : "none";
-    }
-  }
-</script>
-
 </body>
 </html>

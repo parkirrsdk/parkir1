@@ -2,52 +2,20 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>List Approve Ganti Hari</title>
   <link rel="stylesheet" href="style-listApprove.css">
-  <style>
-    .btn-approve-leader {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn-approve-admin {
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn-reject {
-      background-color: #f44336;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn-reject:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    .btn-delete {
-      background-color: #9c27b0;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <h1>List Approve Ganti Hari</h1>
+    <h1>📅 List Approve Ganti Hari</h1>
     
-<input type="text" id="searchInput" placeholder="Cari data..." onkeyup="searchTable()" style="margin-bottom:10px; padding:5px; width:250px;">
+    <div class="search-wrapper">
+      <input type="text" id="searchInput" placeholder="Cari nama, jabatan, atau tanggal..." onkeyup="searchTable()">
+    </div>
 
     <div class="table-responsive">
       <table id="approveTable" class="styled-table">
@@ -57,36 +25,56 @@
             <th>Nama</th>
             <th>Jabatan</th>
             <th>Alasan</th>
-            <th>Tanggal</th>
-            <th>Tanggal Pengganti Hari</th>
-            <th>Leader Approve</th>
-            <th>Tanggal Approve Leader</th>
-            <th>Admin Approve</th>
-            <th>Tanggal Approve Admin</th>
-            <th>Approve</th>
-            <th>Reject</th>
-            <th>Delete</th>
+            <th>Tanggal Awal</th>
+            <th>Tanggal Pengganti</th>
+            <th>Approve Leader</th>
+            <th>Tgl Leader</th>
+            <th>Approve Admin</th>
+            <th>Tgl Admin</th>
+            <th>Aksi</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          <tr class="loading">
+            <td colspan="11">Memuat data...</td>
+          </tr>
+        </tbody>
       </table>
     </div>
+
     <div class="nav-links">
-      <a href="download.html">Download Excel</a>
-	  <a href="index.html">Dashboard</a>
-    
-  <a href="#" onclick="logout()">Logout</a>
-</div>
-
-<script>
-  function logout() {
-    localStorage.removeItem("currentUser");
-    alert("Anda berhasil logout!");
-    window.location.href = "login.html";
-  }
-</script>
-
+      <a href="index.html">🏠 Dashboard</a>
+      <a href="download.html">⬇️ Download Excel</a>
+      <a href="#" onclick="logout()">🚪 Logout</a>
+    </div>
   </div>
+
+  <script>
+    function logout() {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+      }
+    }
+
+    function searchTable() {
+      let input = document.getElementById("searchInput").value.toLowerCase();
+      let table = document.querySelector("table");
+      let trs = table.getElementsByTagName("tr");
+
+      for (let i = 1; i < trs.length; i++) {
+        let tds = trs[i].getElementsByTagName("td");
+        let show = false;
+        for (let j = 0; j < tds.length; j++) {
+          if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
+            show = true;
+            break;
+          }
+        }
+        trs[i].style.display = show ? "" : "none";
+      }
+    }
+  </script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -104,124 +92,170 @@
     const db = getFirestore(app);
 
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-    const role = currentUser ? currentUser.role : "";
+    if (!currentUser) {
+      window.location.href = "login.html";
+    }
+
+    const role = currentUser.role;
 
     async function renderTable() {
       const tbody = document.querySelector('#approveTable tbody');
       tbody.innerHTML = '';
 
-      const snapshot = await getDocs(collection(db, "gantiHariData"));
-      let i = 1;
-      snapshot.forEach(docSnap => {
-        const d = docSnap.data();
+      try {
+        const snapshot = await getDocs(collection(db, "gantiHariData"));
+        let i = 1;
+        let hasData = false;
 
-        if (!d.reject) {
-          let approveBtn = "";
-          if (role === "Leader" && !d.leaderApprove) {
-            approveBtn = `<button class="btn-approve-leader" onclick="approveData('${docSnap.id}')">Approve Leader</button>`;
-          } else if (role === "Admin" && !d.adminApprove) {
-            approveBtn = `<button class="btn-approve-admin" onclick="approveData('${docSnap.id}')">Approve Admin</button>`;
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+
+          if (!d.reject) {
+            hasData = true;
+            let approveBtn = "";
+            
+            if (role === "Leader" && !d.leaderApprove) {
+              approveBtn = `<button class="btn-approve-leader" onclick="approveData('${docSnap.id}')">✅ Approve Leader</button>`;
+            } else if (role === "Admin" && !d.adminApprove) {
+              approveBtn = `<button class="btn-approve-admin" onclick="approveData('${docSnap.id}')">✅ Approve Admin</button>`;
+            }
+
+            let rejectBtn = "";
+            if (d.leaderApprove || d.adminApprove) {
+              rejectBtn = `<button class="btn-reject" disabled>❌ Reject</button>`;
+            } else {
+              rejectBtn = `<button class="btn-reject" onclick="rejectData('${docSnap.id}')">❌ Reject</button>`;
+            }
+
+            const deleteBtn = role === "Superuser" ? `<button class="btn-delete" onclick="deleteData('${docSnap.id}')">🗑️ Delete</button>` : "";
+
+            const leaderStatus = d.leaderApprove 
+              ? `<span class="status-badge status-approved">✅ ${d.leaderBy || ""}</span>` 
+              : `<span class="status-badge status-pending">❌ Belum</span>`;
+
+            const adminStatus = d.adminApprove 
+              ? `<span class="status-badge status-approved">✅ ${d.adminBy || ""}</span>` 
+              : `<span class="status-badge status-pending">❌ Belum</span>`;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${i++}</td>
+              <td><strong>${d.nama || "-"}</strong></td>
+              <td>${d.jabatan || "-"}</td>
+              <td>${d.dikarenakan || "-"}</td>
+              <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
+              <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
+              <td>${leaderStatus}</td>
+              <td>${d.leaderApproveDate || "-"}</td>
+              <td>${adminStatus}</td>
+              <td>${d.adminApproveDate || "-"}</td>
+              <td style="white-space: nowrap;">${approveBtn}${rejectBtn}${deleteBtn}</td>
+            `;
+            tbody.appendChild(tr);
           }
+        });
 
-          // Reject button disabled jika sudah ada approve leader/admin
-          let rejectBtn = "";
-          if (d.leaderApprove || d.adminApprove) {
-            rejectBtn = `<button class="btn-reject" disabled>Reject</button>`;
-          } else {
-            rejectBtn = `<button class="btn-reject" onclick="rejectData('${docSnap.id}')">Reject</button>`;
-          }
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${i++}</td>
-            <td>${d.nama}</td>
-            <td>${d.jabatan}</td>
-            <td>${d.dikarenakan}</td>
-            <td>${d.hari_awal || ""}, ${d.tanggal_awal || ""}-${d.bulan_awal || ""}-${d.tahun_awal || ""}</td>
-            <td>${d.hari_ganti || ""}, ${d.tanggal_ganti || ""}-${d.bulan_ganti || ""}-${d.tahun_ganti || ""}</td>
-            <td>${d.leaderApprove ? "✅ " + (d.leaderBy || "") : "❌ Belum"}</td>
-            <td>${d.leaderApproveDate || "-"}</td>
-            <td>${d.adminApprove ? "✅ " + (d.adminBy || "") : "❌ Belum"}</td>
-            <td>${d.adminApproveDate || "-"}</td>
-            <td>${approveBtn}</td>
-            <td>${rejectBtn}</td>
-            <td>${role === "Superuser" ? `<button class="btn-delete" onclick="deleteData('${docSnap.id}')">Delete</button>` : ""}</td>
+        if (!hasData) {
+          tbody.innerHTML = `
+            <tr class="empty-state">
+              <td colspan="11">
+                <div class="empty-state-icon">📭</div>
+                <h3>Tidak Ada Data</h3>
+                <p>Belum ada data yang perlu di-approve</p>
+              </td>
+            </tr>
           `;
-          tbody.appendChild(tr);
         }
-      });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="11" style="color: red; text-align: center;">
+              ❌ Gagal memuat data. Silakan refresh halaman.
+            </td>
+          </tr>
+        `;
+      }
     }
 
     window.approveData = async function(id) {
-      const ref = doc(db, "gantiHariData", id);
-      const snap = await getDoc(ref);
-      const data = snap.data();
+      if (!confirm('Apakah Anda yakin ingin approve data ini?')) return;
 
-      if (!data) return;
+      try {
+        const ref = doc(db, "gantiHariData", id);
+        const snap = await getDoc(ref);
+        const data = snap.data();
 
-      if (role === "Leader") {
-        await updateDoc(ref, { 
-          leaderApprove: true, 
-          leaderBy: currentUser.username,
-          leaderApproveDate: new Date().toLocaleString("id-ID")
-        });
-        alert("Leader sudah approve!");
-      } 
-      else if (role === "Admin") {
-        if (!data.leaderApprove) {
-          alert("Leader belum approve, Admin tidak bisa approve.");
+        if (!data) {
+          alert("❌ Data tidak ditemukan!");
           return;
         }
-        await updateDoc(ref, { 
-          adminApprove: true, 
-          adminBy: currentUser.username,
-          adminApproveDate: new Date().toLocaleString("id-ID"),
-          approve: true,
-          approvedBy: `${data.leaderBy || ""}, ${currentUser.username}`
-        });
-        alert("Admin sudah approve!");
+
+        if (role === "Leader") {
+          await updateDoc(ref, { 
+            leaderApprove: true, 
+            leaderBy: currentUser.username,
+            leaderApproveDate: new Date().toLocaleString("id-ID")
+          });
+          alert("✅ Leader berhasil approve!");
+        } 
+        else if (role === "Admin") {
+          if (!data.leaderApprove) {
+            alert("⚠️ Leader belum approve, Admin tidak bisa approve.");
+            return;
+          }
+          await updateDoc(ref, { 
+            adminApprove: true, 
+            adminBy: currentUser.username,
+            adminApproveDate: new Date().toLocaleString("id-ID"),
+            approve: true,
+            approvedBy: `${data.leaderBy || ""}, ${currentUser.username}`
+          });
+          alert("✅ Admin berhasil approve!");
+        }
+        renderTable();
+      } catch (error) {
+        console.error("Error approving data:", error);
+        alert("❌ Gagal approve data!");
       }
-      renderTable();
     };
 
     window.rejectData = async function(id) {
       const reason = prompt("Masukkan alasan reject:");
-      if (!reason) return;
-      await updateDoc(doc(db, "gantiHariData", id), { reject: true, reason });
-      alert("Data telah di-reject!");
-      renderTable();
+      if (!reason || reason.trim() === "") {
+        alert("Alasan reject harus diisi!");
+        return;
+      }
+
+      try {
+        await updateDoc(doc(db, "gantiHariData", id), { 
+          reject: true, 
+          reason: reason.trim(),
+          rejectedBy: currentUser.username,
+          rejectDate: new Date().toLocaleString("id-ID")
+        });
+        alert("✅ Data berhasil di-reject!");
+        renderTable();
+      } catch (error) {
+        console.error("Error rejecting data:", error);
+        alert("❌ Gagal reject data!");
+      }
     };
 
     window.deleteData = async function(id) {
-      if (confirm("Yakin ingin menghapus data ini?")) {
+      if (!confirm("⚠️ Yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan!")) return;
+
+      try {
         await deleteDoc(doc(db, "gantiHariData", id));
-        alert("Data telah dihapus!");
+        alert("✅ Data berhasil dihapus!");
         renderTable();
+      } catch (error) {
+        console.error("Error deleting data:", error);
+        alert("❌ Gagal menghapus data!");
       }
     };
 
     renderTable();
   </script>
-
-<script>
-  function searchTable() {
-    let input = document.getElementById("searchInput").value.toLowerCase();
-    let table = document.querySelector("table");
-    let trs = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < trs.length; i++) { // skip header row
-      let tds = trs[i].getElementsByTagName("td");
-      let show = false;
-      for (let j = 0; j < tds.length; j++) {
-        if (tds[j].innerText.toLowerCase().indexOf(input) > -1) {
-          show = true;
-          break;
-        }
-      }
-      trs[i].style.display = show ? "" : "none";
-    }
-  }
-</script>
-
 </body>
 </html>
