@@ -5,10 +5,38 @@
   <title>List Data Ganti Hari</title>
   <link rel="stylesheet" href="style-listData.css">
   <style>
+     /* Sedikit gaya untuk pagination */
     .pagination-controls { margin: 12px 0; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     .pagination-controls select, .pagination-controls button { padding:6px 8px; }
+
+    /* Button styles agar Prev/Next terlihat jelas */
+    .pagination-controls button {
+      background-color: #0d6efd; /* biru yang jelas */
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      transition: background-color 0.15s ease, transform 0.06s ease;
+      cursor: pointer;
+    }
+    .pagination-controls button:hover:not(:disabled) {
+      background-color: #0b5ed7;
+      transform: translateY(-1px);
+    }
+
+    /* Saat disabled: tetap gunakan warna agar tidak terlihat abu-abu, namun beri indikasi non-interaktif */
+    .pagination-controls button:disabled {
+      opacity: 0.8;               /* sedikit reduksi, tapi tidak terlalu abu-abu */
+      cursor: not-allowed;
+      background-color: #0d6efd; /* sama warna sehingga tetap terlihat */
+      color: #ffffff;
+      box-shadow: none;
+      transform: none;
+    }
+
     .page-info { margin-left:8px; font-size:14px; color:#333; }
-    .pagination-controls button:disabled { opacity:0.5; cursor:not-allowed; }
   </style>
 </head>
 <body>
